@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <XCBKit/XCBConnection.h>
 
 
 int main(int argc, const char * argv[])
@@ -16,7 +15,6 @@ int main(int argc, const char * argv[])
     {
         // insert code here...
         NSLog(@"Starting Puck Dock...");
-        XCBConnection *connection = [XCBConnection init];
 
     }
 
