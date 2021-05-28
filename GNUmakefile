@@ -14,8 +14,10 @@ $(TOOL_NAME)_LD_FLAGS += -L./XCBKit/XCBKit.framkework/
 
 $(TOOL_NAME)_OBJC_FILES = \
 		main.m \
+		PuckUIHandler.m \
 
 $(TOOL_NAME)_HEADER_FILES = \
+		PuckUIHandler.h \
 
 $(TOOL_NAME)_TOOL_LIBS = -lXCBKit -lxcb
 
