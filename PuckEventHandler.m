@@ -23,7 +23,31 @@
 
 - (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent
 {
+    NSLog(@"Window iconified with id: %u", anEvent->window);
+}
 
+- (void)startEventHandlerLoop
+{
+    xcb_generic_event_t *e;
+
+    while ((e = xcb_wait_for_event([super connection])))
+    {
+        NSLog(@"Event: %d", e->full_sequence);
+        switch (e->response_type & ~0x80)
+        {
+            case XCB_PROPERTY_NOTIFY:
+            {
+                NSLog(@"Pene vagina");
+                xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
+                [super handlePropertyNotify:propEvent];
+                [super flush];
+                break;
+            }
+            default:
+                NSLog(@"Pene vagina");
+                break;
+        }
+    }
 }
 
 - (void) dealloc

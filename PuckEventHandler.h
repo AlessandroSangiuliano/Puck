@@ -14,6 +14,7 @@
 
 - (id) init;
 
-- (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent;
+- (void) handlePropertyNotify:(xcb_property_notify_event_t*)anEvent;
+- (void) startEventHandlerLoop;
 
 @end

@@ -22,8 +22,7 @@ int main(int argc, const char * argv[])
 
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithEventHandler:eventHandler];
         [uiHandler drawDock:200 andHeigth:80];
-
-        pause();
+        [eventHandler startEventHandlerLoop];
     }
 
     return 0;
