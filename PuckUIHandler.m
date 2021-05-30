@@ -10,10 +10,10 @@
 
 @implementation PuckUIHandler
 
-@synthesize connection;
+@synthesize eventHandler;
 @synthesize window;
 
-- (id) init
+- (id)initWithEventHandler:(PuckEventHandler*)anEventHandler
 {
     self = [super init];
 
@@ -23,15 +23,14 @@
         return nil;
     }
 
-    connection = [[XCBConnection alloc] init];
-
+    eventHandler = anEventHandler;
     return self;
 
 }
 
 - (void)drawDock:(CGFloat)width andHeigth:(CGFloat)height
 {
-    XCBScreen *screen = [[connection screens] objectAtIndex:0];
+    XCBScreen *screen = [[eventHandler screens] objectAtIndex:0];
     XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
 
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
@@ -50,21 +49,27 @@
     [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
     [request setValueList:values];
 
-    XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:YES];
+    XCBWindowTypeResponse *response = [eventHandler createWindowForRequest:request registerWindow:YES];
     window = [response window];
     values[0] = 1;
     values[1] = 0;
 
     [window changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
 
-    [connection mapWindow:window];
-    [connection flush];
+    [eventHandler mapWindow:window];
+    [eventHandler flush];
 
     screen = nil;
     request = nil;
     response = nil;
     visual = nil;
 
+}
+
+- (void)dealloc
+{
+    eventHandler = nil;
+    window = nil;
 }
 
 @end
