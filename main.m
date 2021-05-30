@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
+#import "PuckEventHandler.h"
 #import <unistd.h>
 
 
@@ -18,8 +19,10 @@ int main(int argc, const char * argv[])
         // insert code here...
         NSLog(@"Starting Puck Dock...");
 
-        PuckUIHandler *handler = [[PuckUIHandler alloc] init];
-        [handler drawDock:200 andHeigth:80];
+        PuckEventHandler *eventHandler = [[PuckEventHandler alloc] init];
+
+        PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithEventHandler:eventHandler];
+        [uiHandler drawDock:200 andHeigth:80];
 
         pause();
     }

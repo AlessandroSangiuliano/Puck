@@ -7,14 +7,16 @@
 
 #import <Foundation/Foundation.h>
 #import <XCBKit/XCBConnection.h>
+#import "PuckEventHandler.h"
 
 @interface PuckUIHandler : NSObject
 {
 }
 
-@property (strong, nonatomic) XCBConnection *connection;
+@property (strong, nonatomic) PuckEventHandler *eventHandler;
 @property (strong, nonatomic) XCBWindow *window;
 
-- (id) init;
+- (id) initWithEventHandler:(PuckEventHandler*) anEventHandler;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
+
 @end
