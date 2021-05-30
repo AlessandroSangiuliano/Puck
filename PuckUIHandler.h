@@ -13,5 +13,8 @@
 }
 
 @property (strong, nonatomic) XCBConnection *connection;
+@property (strong, nonatomic) XCBWindow *window;
 
+- (id) init;
+- (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
 @end
