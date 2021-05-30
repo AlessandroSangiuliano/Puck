@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
-#import "PuckEventHandler.h"
 #import <unistd.h>
 
 
