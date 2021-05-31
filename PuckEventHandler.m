@@ -44,11 +44,12 @@
                 break;
             }
             default:
+            {
                 NSLog(@"Default");
                 break;
+            }
         }
     }
-    [super ungrabServer];
 }
 
 - (void) dealloc
