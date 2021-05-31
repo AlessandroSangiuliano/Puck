@@ -9,7 +9,7 @@
 #import <XCBKit/XCBConnection.h>
 #import "PuckEventHandler.h"
 
-#define DOCKMASK XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_STRUCTURE_NOTIFY
+#define DOCKMASK  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE
 
 @interface PuckUIHandler : NSObject
 {
