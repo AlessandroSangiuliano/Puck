@@ -36,7 +36,7 @@
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
-    uint32_t values[] = {[screen screen]->white_pixel, FRAMEMASK};
+    uint32_t values[] = {[screen screen]->white_pixel, DOCKMASK};
 
     [request setParentWindow:[screen rootWindow]];
     [request setDepth:[screen screen]->root_depth];

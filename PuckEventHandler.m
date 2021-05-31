@@ -32,7 +32,7 @@
 
     while ((e = xcb_wait_for_event([super connection])))
     {
-        NSLog(@"Event: %d", e->full_sequence);
+        NSLog(@"Event: %d", e->response_type);
         switch (e->response_type & ~0x80)
         {
             case XCB_PROPERTY_NOTIFY:
@@ -44,10 +44,11 @@
                 break;
             }
             default:
-                NSLog(@"Pene vagina");
+                NSLog(@"Default");
                 break;
         }
     }
+    [super ungrabServer];
 }
 
 - (void) dealloc
