@@ -37,7 +37,7 @@
         {
             case XCB_PROPERTY_NOTIFY:
             {
-                NSLog(@"Pene vagina");
+                NSLog(@"In property event finally");
                 xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
                 [super handlePropertyNotify:propEvent];
                 [super flush];
