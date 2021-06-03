@@ -5,8 +5,11 @@
 // Created by slex on 30/05/21.
 
 #import "PuckEventHandler.h"
+#import <XCBKit/services/ICCCMService.h>
 
 @implementation PuckEventHandler
+
+@synthesize connection;
 
 - (id)init
 {
@@ -18,19 +21,25 @@
         return nil;
     }
 
+    connection = [[XCBConnection alloc] init];
+
     return self;
 }
 
 - (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent
 {
     NSLog(@"Window iconified with id: %u", anEvent->window);
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    NSString *name = [[icccmService atomService] atomNameFromAtom:anEvent->atom];
+    NSLog(@"SI SI %@", name);
+    icccmService = nil;
 }
 
 - (void)startEventHandlerLoop
 {
     xcb_generic_event_t *e;
 
-    while ((e = xcb_wait_for_event([super connection])))
+    while ((e = xcb_wait_for_event([connection connection])))
     {
         NSLog(@"Event: %d", e->response_type);
         switch (e->response_type & ~0x80)
@@ -40,7 +49,12 @@
                 NSLog(@"In property event finally");
                 xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
                 [self handlePropertyNotify:propEvent];
-                [super flush];
+                [connection flush];
+                break;
+            }
+            case XCB_MOTION_NOTIFY:
+            {
+                //NSLog(@"PENE");
                 break;
             }
             default:
@@ -54,7 +68,7 @@
 
 - (void) dealloc
 {
-
+    connection = nil;
 }
 
 @end

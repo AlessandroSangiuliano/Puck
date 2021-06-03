@@ -8,9 +8,11 @@
 #import <Foundation/Foundation.h>
 #import <XCBKit/XCBConnection.h>
 
-@interface PuckEventHandler : XCBConnection
+@interface PuckEventHandler : NSObject
 {
 }
+
+@property (strong, nonatomic) XCBConnection *connection;
 
 - (id) init;
 
