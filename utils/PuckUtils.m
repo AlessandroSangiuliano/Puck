@@ -60,7 +60,7 @@
                                             length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
-    int size = xcb_get_property_value_length(reply);
+    clientListSize = xcb_get_property_value_length(reply);
 
     rootWindow = nil;
 
