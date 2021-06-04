@@ -27,7 +27,7 @@
     eventHandler = anEventHandler;
     puckUtils = [[PuckUtils alloc] initWhitConnection:[eventHandler connection]];
 
-    clientList = [puckUtils queryForNetClientList];
+    clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
     return self;
 }
