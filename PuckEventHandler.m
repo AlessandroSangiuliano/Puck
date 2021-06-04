@@ -21,7 +21,7 @@
         return nil;
     }
 
-    connection = [[XCBConnection alloc] init];
+    connection = [[XCBConnection alloc] initAsWindowManager:NO];
 
     return self;
 }
@@ -29,10 +29,6 @@
 - (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent
 {
     NSLog(@"Window iconified with id: %u", anEvent->window);
-    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
-    NSString *name = [[icccmService atomService] atomNameFromAtom:anEvent->atom];
-    NSLog(@"SI SI %@", name);
-    icccmService = nil;
 }
 
 - (void)startEventHandlerLoop

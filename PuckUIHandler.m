@@ -28,16 +28,13 @@
     puckUtils = [[PuckUtils alloc] initWhitConnection:[eventHandler connection]];
 
     clientList = [puckUtils queryForNetClientList];
-    NSLog(@"Window id: %u", clientList[1]);
 
     return self;
-
 }
 
 - (void)drawDock:(CGFloat)width andHeigth:(CGFloat)height
 {
     XCBScreen *screen = [[[eventHandler connection] screens] objectAtIndex:0];
-    XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
     XCBConnection *connection = [eventHandler connection];
     XCBWindow *rootWindow = [screen rootWindow];
 
@@ -45,6 +42,8 @@
     [visual setVisualTypeForScreen:screen];
 
     uint32_t values[] = {[screen screen]->white_pixel, FRAMEMASK};
+
+    XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
 
     [request setParentWindow:rootWindow];
     [request setDepth:[screen screen]->root_depth];

@@ -15,6 +15,7 @@
 
 @property (strong, nonatomic) XCBConnection *connection;
 @property (strong, nonatomic) EWMHService *ewmhService;
+@property (nonatomic, assign) int clientListSize;
 
 - (id)initWhitConnection:(XCBConnection*)aConnection;
 - (xcb_window_t*)queryForNetClientList;
