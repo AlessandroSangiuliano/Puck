@@ -1,0 +1,27 @@
+//
+// PuckUIHandler
+// Puck
+//
+// Created by slex on 28/05/21.
+//
+
+#import <Foundation/Foundation.h>
+#import <XCBKit/XCBConnection.h>
+#import "PuckEventHandler.h"
+#import "utils/PuckUtils.h"
+
+#define DOCKMASK  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE
+
+@interface PuckUIHandler : NSObject
+{
+}
+
+@property (strong, nonatomic) PuckEventHandler *eventHandler;
+@property (strong, nonatomic) XCBWindow *window;
+@property (nonatomic, assign) xcb_window_t *clientList;
+@property (strong, nonatomic) PuckUtils *puckUtils;
+
+- (id) initWithEventHandler:(PuckEventHandler*) anEventHandler;
+- (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
+
+@end
