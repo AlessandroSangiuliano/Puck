@@ -5,13 +5,14 @@
 // Created by slex on 28/05/21.
 
 #import "PuckUIHandler.h"
-#import <XCBKit/utils/XCBCreateWindowTypeRequest.h>
-#import <XCBKit/utils/XCBWindowTypeResponse.h>
+
 
 @implementation PuckUIHandler
 
 @synthesize eventHandler;
 @synthesize window;
+@synthesize clientList;
+@synthesize puckUtils;
 
 - (id)initWithEventHandler:(PuckEventHandler*)anEventHandler
 {
@@ -24,21 +25,27 @@
     }
 
     eventHandler = anEventHandler;
-    return self;
+    puckUtils = [[PuckUtils alloc] initWhitConnection:[eventHandler connection]];
 
+    clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
+
+    return self;
 }
 
 - (void)drawDock:(CGFloat)width andHeigth:(CGFloat)height
 {
-    XCBScreen *screen = [[eventHandler screens] objectAtIndex:0];
-    XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
+    XCBScreen *screen = [[[eventHandler connection] screens] objectAtIndex:0];
+    XCBConnection *connection = [eventHandler connection];
+    XCBWindow *rootWindow = [screen rootWindow];
 
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
     [visual setVisualTypeForScreen:screen];
 
     uint32_t values[] = {[screen screen]->white_pixel, FRAMEMASK};
 
-    [request setParentWindow:[screen rootWindow]];
+    XCBCreateWindowTypeRequest *request = [[XCBCreateWindowTypeRequest alloc] initForWindowType:XCBWindowRequest];
+
+    [request setParentWindow:rootWindow];
     [request setDepth:[screen screen]->root_depth];
     [request setXPosition:[screen width] / 2 - width / 2];
     [request setYPosition:[screen height] - height];
@@ -49,27 +56,31 @@
     [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
     [request setValueList:values];
 
-    XCBWindowTypeResponse *response = [eventHandler createWindowForRequest:request registerWindow:YES];
+    XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:YES];
     window = [response window];
     values[0] = 1;
     values[1] = 0;
 
     [window changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
+    uint32_t val[] = {DOCKMASK};
+    [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 
-    [eventHandler mapWindow:window];
-    [eventHandler flush];
+    [connection mapWindow:window];
+    [connection flush];
 
     screen = nil;
     request = nil;
     response = nil;
     visual = nil;
-
+    connection = nil;
+    rootWindow = nil;
 }
 
 - (void)dealloc
 {
     eventHandler = nil;
     window = nil;
+    puckUtils = nil;
 }
 
 @end

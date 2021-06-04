@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
-#import <unistd.h>
 
 
 int main(int argc, const char * argv[])
@@ -22,8 +21,7 @@ int main(int argc, const char * argv[])
 
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithEventHandler:eventHandler];
         [uiHandler drawDock:200 andHeigth:80];
-
-        pause();
+        [eventHandler startEventHandlerLoop];
     }
 
     return 0;

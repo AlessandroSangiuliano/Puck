@@ -8,12 +8,15 @@
 #import <Foundation/Foundation.h>
 #import <XCBKit/XCBConnection.h>
 
-@interface PuckEventHandler : XCBConnection
+@interface PuckEventHandler : NSObject
 {
 }
 
+@property (strong, nonatomic) XCBConnection *connection;
+
 - (id) init;
 
-- (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent;
+- (void) handlePropertyNotify:(xcb_property_notify_event_t*)anEvent;
+- (void) startEventHandlerLoop;
 
 @end
