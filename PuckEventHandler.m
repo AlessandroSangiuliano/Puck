@@ -28,7 +28,9 @@
 
 - (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent
 {
-    NSLog(@"Window iconified with id: %u", anEvent->window);
+    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
+    NSString *name = [atomService atomNameFromAtom:anEvent->atom];
+    NSLog(@"Aton name: %@", name);
 }
 
 - (void)startEventHandlerLoop
@@ -37,12 +39,16 @@
 
     while ((e = xcb_wait_for_event([connection connection])))
     {
-        NSLog(@"Event: %d", e->response_type);
         switch (e->response_type & ~0x80)
         {
+            case XCB_MAP_NOTIFY:
+            {
+                xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
+                NSLog(@"Window %u mapped", mapNotify->window);
+                break;
+            }
             case XCB_PROPERTY_NOTIFY:
             {
-                NSLog(@"In property event finally");
                 xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
                 [self handlePropertyNotify:propEvent];
                 [connection flush];
@@ -50,7 +56,6 @@
             }
             case XCB_MOTION_NOTIFY:
             {
-                //NSLog(@"PENE");
                 break;
             }
             default:
