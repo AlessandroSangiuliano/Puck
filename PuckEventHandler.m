@@ -5,13 +5,12 @@
 // Created by slex on 30/05/21.
 
 #import "PuckEventHandler.h"
-#import <XCBKit/services/ICCCMService.h>
 
 @implementation PuckEventHandler
 
-@synthesize connection;
+@synthesize uiHandler;
 
-- (id)init
+- (id)initWithUIHandler:(PuckUIHandler*)anUiHandler
 {
     self = [super init];
 
@@ -20,8 +19,8 @@
         NSLog(@"Unable to init...");
         return nil;
     }
-
-    connection = [[XCBConnection alloc] initAsWindowManager:NO];
+    
+    uiHandler = anUiHandler;
 
     return self;
 }
@@ -69,7 +68,7 @@
 
 - (void) dealloc
 {
-    connection = nil;
+    uiHandler = nil;
 }
 
 @end
