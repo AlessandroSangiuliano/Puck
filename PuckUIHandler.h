@@ -16,12 +16,12 @@
 {
 }
 
-@property (strong, nonatomic) PuckEventHandler *eventHandler;
+@property (strong, nonatomic) XCBConnection *connection;
 @property (strong, nonatomic) XCBWindow *window;
 @property (nonatomic, assign) xcb_window_t *clientList;
 @property (strong, nonatomic) PuckUtils *puckUtils;
 
-- (id) initWithEventHandler:(PuckEventHandler*) anEventHandler;
+- (id) initWithConnection:(XCBConnection*) aConnection;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
 
 @end

@@ -18,11 +18,10 @@ int main(int argc, const char * argv[])
         NSLog(@"Starting Puck Dock...");
 
         PuckEventHandler *eventHandler = [[PuckEventHandler alloc] init];
-
-        PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithEventHandler:eventHandler];
+        XCBConnection *connection = [[XCBConnection alloc] initAsWindowManager:NO];
+        PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithConnection:connection];
         [uiHandler drawDock:200 andHeigth:80];
         [eventHandler startEventHandlerLoop];
-    }
 
     return 0;
 }
