@@ -7,7 +7,6 @@
 
 #import <Foundation/Foundation.h>
 #import <XCBKit/XCBConnection.h>
-#import "PuckEventHandler.h"
 #import "utils/PuckUtils.h"
 
 #define DOCKMASK  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE
@@ -16,12 +15,12 @@
 {
 }
 
-@property (strong, nonatomic) PuckEventHandler *eventHandler;
 @property (strong, nonatomic) XCBWindow *window;
 @property (nonatomic, assign) xcb_window_t *clientList;
 @property (strong, nonatomic) PuckUtils *puckUtils;
+@property (strong, nonatomic) XCBConnection *connection;
 
-- (id) initWithEventHandler:(PuckEventHandler*) anEventHandler;
+- (id) initWithConnection:(XCBConnection*) aConnection;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
 
 @end

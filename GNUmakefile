@@ -2,7 +2,7 @@ PACKAGE_NAME = Puck
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-VERSION = 0.0.1
+VERSION = 0.0.2
 
 DEPENDENCIES = XCBKit
 
@@ -16,11 +16,13 @@ $(TOOL_NAME)_OBJC_FILES = \
 		main.m \
 		PuckUIHandler.m \
 		PuckEventHandler.m \
+		PuckEventHandlerFactory.m \
 		utils/PuckUtils.m \
 
 $(TOOL_NAME)_HEADER_FILES = \
 		PuckUIHandler.h \
 		PuckEventHandler.h \
+		PuckEventHandlerFactory.h \
 		utils/PuckUtils.h \
 
 $(TOOL_NAME)_TOOL_LIBS = -lXCBKit -lxcb
