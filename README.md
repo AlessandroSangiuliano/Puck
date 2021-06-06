@@ -6,7 +6,7 @@ Puck uses XCBKit to interact with the X Window Server (X11 protocol).
 
 Actually is under heavy development and in an early stage.
 
-In the version 0.0.1 is capable to:
+In the version 0.0.2 is capable to:
 
 - Draws itself on the screen
 - Listens for some events, the most important is PropertyNotify, searching for property changes.
