@@ -71,7 +71,6 @@
     request = nil;
     response = nil;
     visual = nil;
-    connection = nil;
     rootWindow = nil;
 }
 
@@ -80,6 +79,9 @@
     connection = nil;
     window = nil;
     puckUtils = nil;
+
+    if (clientList)
+        free(clientList); // is pure C, but inside there are unsigned int values
 }
 
 @end
