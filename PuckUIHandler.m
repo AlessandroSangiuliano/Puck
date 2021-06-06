@@ -9,12 +9,12 @@
 
 @implementation PuckUIHandler
 
-@synthesize eventHandler;
 @synthesize window;
 @synthesize clientList;
 @synthesize puckUtils;
+@synthesize connection;
 
-- (id)initWithEventHandler:(PuckEventHandler*)anEventHandler
+- (id)initWithConnection:(XCBConnection*)aConnection
 {
     self = [super init];
 
@@ -24,8 +24,8 @@
         return nil;
     }
 
-    eventHandler = anEventHandler;
-    puckUtils = [[PuckUtils alloc] initWhitConnection:[eventHandler connection]];
+    connection = aConnection;
+    puckUtils = [[PuckUtils alloc] initWhitConnection:connection];
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
@@ -34,8 +34,7 @@
 
 - (void)drawDock:(CGFloat)width andHeigth:(CGFloat)height
 {
-    XCBScreen *screen = [[[eventHandler connection] screens] objectAtIndex:0];
-    XCBConnection *connection = [eventHandler connection];
+    XCBScreen *screen = [[connection screens] objectAtIndex:0];
     XCBWindow *rootWindow = [screen rootWindow];
 
     XCBVisual *visual = [[XCBVisual alloc] initWithVisualId:[screen screen]->root_visual];
@@ -72,15 +71,17 @@
     request = nil;
     response = nil;
     visual = nil;
-    connection = nil;
     rootWindow = nil;
 }
 
 - (void)dealloc
 {
-    eventHandler = nil;
+    connection = nil;
     window = nil;
     puckUtils = nil;
+
+    if (clientList)
+        free(clientList); // is pure C, but inside there are unsigned int values
 }
 
 @end
