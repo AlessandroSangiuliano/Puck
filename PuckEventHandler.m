@@ -5,6 +5,7 @@
 // Created by slex on 30/05/21.
 
 #import "PuckEventHandler.h"
+#import "PuckEventHandlerFactory.h"
 
 @implementation PuckEventHandler
 
@@ -19,22 +20,17 @@
         NSLog(@"Unable to init...");
         return nil;
     }
-    
+
     uiHandler = anUiHandler;
 
     return self;
 }
 
-- (void)handlePropertyNotify:(xcb_property_notify_event_t*)anEvent
-{
-    XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
-    NSString *name = [atomService atomNameFromAtom:anEvent->atom];
-    NSLog(@"Aton name: %@", name);
-}
-
 - (void)startEventHandlerLoop
 {
     xcb_generic_event_t *e;
+    XCBConnection *connection = [uiHandler connection];
+    PuckEventHandlerFactory *eventHandler = [[PuckEventHandlerFactory alloc] initWithConnection:connection];
 
     while ((e = xcb_wait_for_event([connection connection])))
     {
@@ -49,7 +45,7 @@
             case XCB_PROPERTY_NOTIFY:
             {
                 xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
-                [self handlePropertyNotify:propEvent];
+                [eventHandler handlePropertyNotify:propEvent];
                 [connection flush];
                 break;
             }
@@ -64,11 +60,15 @@
             }
         }
     }
+
+    eventHandler = nil;
+    connection = nil;
 }
 
 - (void) dealloc
 {
     uiHandler = nil;
+
 }
 
 @end

@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
+#import "PuckEventHandler.h"
 
 
 int main(int argc, const char * argv[])
@@ -17,11 +18,12 @@ int main(int argc, const char * argv[])
         // insert code here...
         NSLog(@"Starting Puck Dock...");
 
-        PuckEventHandler *eventHandler = [[PuckEventHandler alloc] init];
         XCBConnection *connection = [[XCBConnection alloc] initAsWindowManager:NO];
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithConnection:connection];
+        PuckEventHandler *eventHandler = [[PuckEventHandler alloc] initWithUIHandler:uiHandler];
         [uiHandler drawDock:200 andHeigth:80];
         [eventHandler startEventHandlerLoop];
+}
 
     return 0;
 }
