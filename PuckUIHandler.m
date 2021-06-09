@@ -29,6 +29,16 @@
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
+    int size = [puckUtils clientListSize];
+
+    NSLog(@"Windows in the client list with size: %d", size);
+
+    for (int i = 0; i < size; ++i)
+    {
+        NSLog(@"%u", clientList[i]);
+    }
+
+
     return self;
 }
 
