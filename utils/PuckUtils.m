@@ -73,6 +73,17 @@
     return list;
 }
 
+- (void) encapsulateWindow:(xcb_window_t)aWindow
+{
+    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
+
+    NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
+    [[connection windowsMap] setObject:window forKey:key];
+
+    window = nil;
+    key = nil;
+}
+
 - (void)dealloc
 {
     connection = nil;

@@ -20,5 +20,6 @@
 - (id)initWhitConnection:(XCBConnection*)aConnection;
 - (xcb_window_t*)queryForNetClientList;
 - (xcb_window_t*) queryForNetClientListStacking;
+- (void) encapsulateWindow:(xcb_window_t)aWindow;
 
 @end

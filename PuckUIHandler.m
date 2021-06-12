@@ -33,6 +33,11 @@
 
     iconizedWindowsArray = [[NSMutableArray alloc] init];
 
+    int size = [puckUtils clientListSize];
+
+    for (int i = 0; i < size; ++i)
+        [puckUtils encapsulateWindow:clientList[i]];
+
     return self;
 }
 
@@ -65,6 +70,7 @@
     values[1] = 0;
 
     [window changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
+
     uint32_t val[] = {DOCKMASK};
     [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 
@@ -72,7 +78,7 @@
 
     [request setParentWindow:window];
     [request setXPosition:width - 50];
-    [request setYPosition:height - 75];
+    [request setYPosition:height - 58];
     [request setWidth:width];
     [request setHeight:height];
 
