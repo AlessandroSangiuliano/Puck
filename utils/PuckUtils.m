@@ -37,7 +37,7 @@
                                       propertyType:XCB_ATOM_WINDOW
                                          forWindow:rootWindow
                                             delete:NO
-                                            length:1000];
+                                            length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
     clientListSize = xcb_get_property_value_length(reply);
