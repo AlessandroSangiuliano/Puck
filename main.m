@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
-#import "PuckEventHandler.h"
+#import "PuckRunLoop.h"
 
 
 int main(int argc, const char * argv[])
@@ -20,7 +20,7 @@ int main(int argc, const char * argv[])
 
         XCBConnection *connection = [[XCBConnection alloc] initAsWindowManager:NO];
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithConnection:connection];
-        PuckEventHandler *eventHandler = [[PuckEventHandler alloc] initWithUIHandler:uiHandler];
+        PuckRunLoop *puckRunLoop = [[PuckRunLoop alloc] initWithUIHandler:uiHandler];
         [uiHandler drawDock:200 andHeigth:60];
 
         int size = [[uiHandler puckUtils] clientListSize];
@@ -29,12 +29,12 @@ int main(int argc, const char * argv[])
 
         for (int i = 0; i < size; ++i)
         {
-            [eventHandler addListenerForWindow:[windows objectAtIndex:i]];
+            [puckRunLoop addListenerForWindow:[windows objectAtIndex:i]];
         }
 
         windows = nil;
 
-        [eventHandler startEventHandlerLoop];
+        [puckRunLoop startEventHandlerLoop];
 }
 
     return 0;

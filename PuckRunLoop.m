@@ -1,13 +1,13 @@
 //
-// PuckEventHandler
+// PuckRunLoop
 // Puck
 //
 // Created by slex on 30/05/21.
 
-#import "PuckEventHandler.h"
+#import "PuckRunLoop.h"
 #import "PuckEventHandlerFactory.h"
 
-@implementation PuckEventHandler
+@implementation PuckRunLoop
 
 @synthesize uiHandler;
 
