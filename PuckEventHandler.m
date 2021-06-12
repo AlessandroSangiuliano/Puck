@@ -55,7 +55,7 @@
             }
             default:
             {
-                NSLog(@"Default");
+                //NSLog(@"Default");
                 break;
             }
         }

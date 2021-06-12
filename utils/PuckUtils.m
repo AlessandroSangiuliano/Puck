@@ -40,8 +40,10 @@
                                             length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
-    clientListSize = xcb_get_property_value_length(reply);
     [connection flush];
+
+    for (int i = 0; list[i] != 0; i++)
+        clientListSize = i + 1;
 
     rootWindow = nil;
 
@@ -60,7 +62,11 @@
                                             length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
-    clientListSize = xcb_get_property_value_length(reply);
+    [connection flush];
+
+    for (int i = 0; list[i] != 0; i++)
+        clientListSize = i + 1;
+
 
     rootWindow = nil;
 

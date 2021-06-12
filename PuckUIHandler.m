@@ -13,6 +13,8 @@
 @synthesize clientList;
 @synthesize puckUtils;
 @synthesize connection;
+@synthesize iconizedWindowsArray;
+@synthesize iconizedWindowsContainer;
 
 - (id)initWithConnection:(XCBConnection*)aConnection
 {
@@ -29,15 +31,7 @@
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
-    int size = [puckUtils clientListSize];
-
-    NSLog(@"Windows in the client list with size: %d", size);
-
-    for (int i = 0; i < size; ++i)
-    {
-        NSLog(@"%u", clientList[i]);
-    }
-
+    iconizedWindowsArray = [[NSMutableArray alloc] init];
 
     return self;
 }
@@ -65,7 +59,7 @@
     [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
     [request setValueList:values];
 
-    XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:YES];
+    XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:NO];
     window = [response window];
     values[0] = 1;
     values[1] = 0;
@@ -74,7 +68,23 @@
     uint32_t val[] = {DOCKMASK};
     [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 
+    /*** Request for the iconized windows container ***/
+
+    [request setParentWindow:window];
+    [request setXPosition:width - 50];
+    [request setYPosition:height - 75];
+    [request setWidth:width];
+    [request setHeight:height];
+
+    values[0] = [screen screen]->white_pixel;
+    values[1] = FRAMEMASK;
+
+    response = [connection createWindowForRequest:request registerWindow:NO];
+
+    iconizedWindowsContainer = [response window];
+
     [connection mapWindow:window];
+    [connection mapWindow:iconizedWindowsContainer];
     [connection flush];
 
     screen = nil;
@@ -88,6 +98,8 @@
 {
     connection = nil;
     window = nil;
+    iconizedWindowsContainer = nil;
+    iconizedWindowsArray = nil;
     puckUtils = nil;
 
     if (clientList)

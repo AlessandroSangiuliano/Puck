@@ -16,9 +16,11 @@
 }
 
 @property (strong, nonatomic) XCBWindow *window;
+@property (strong, nonatomic) XCBWindow *iconizedWindowsContainer;
 @property (nonatomic, assign) xcb_window_t *clientList;
 @property (strong, nonatomic) PuckUtils *puckUtils;
 @property (strong, nonatomic) XCBConnection *connection;
+@property (strong, nonatomic) NSMutableArray *iconizedWindowsArray;
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
