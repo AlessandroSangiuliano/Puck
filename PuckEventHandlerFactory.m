@@ -5,8 +5,6 @@
 // Created by slex on 05/06/21.
 
 #import "PuckEventHandlerFactory.h"
-#import <XCBKit/services/XCBAtomService.h>
-#import <XCBKit/services/EWMHService.h>
 #import <XCBKit/services/ICCCMService.h>
 
 @implementation PuckEventHandlerFactory
