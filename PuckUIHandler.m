@@ -13,7 +13,7 @@
 @synthesize clientList;
 @synthesize puckUtils;
 @synthesize connection;
-@synthesize iconizedWindowsArray;
+@synthesize iconizedWindows;
 @synthesize iconizedWindowsContainer;
 
 - (id)initWithConnection:(XCBConnection*)aConnection
@@ -31,7 +31,12 @@
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
-    iconizedWindowsArray = [[NSMutableArray alloc] init];
+    iconizedWindows = [[NSMutableDictionary alloc] init];
+
+    int size = [puckUtils clientListSize];
+
+    for (int i = 0; i < size; ++i)
+        [puckUtils encapsulateWindow:clientList[i]];
 
     return self;
 }
@@ -65,6 +70,7 @@
     values[1] = 0;
 
     [window changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
+
     uint32_t val[] = {DOCKMASK};
     [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 
@@ -72,7 +78,7 @@
 
     [request setParentWindow:window];
     [request setXPosition:width - 50];
-    [request setYPosition:height - 75];
+    [request setYPosition:height - 58];
     [request setWidth:width];
     [request setHeight:height];
 
@@ -94,12 +100,41 @@
     rootWindow = nil;
 }
 
+- (void)addToIconizedWindows:(XCBWindow*)aWindow
+{
+    NSLog(@"Adding window %u", [aWindow window]);
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [iconizedWindows setObject:aWindow forKey:key];
+    key = nil;
+}
+
+- (BOOL)inIconizedWindowsWithId:(xcb_window_t)winId
+{
+    BOOL present = NO;
+    NSNumber *key = [NSNumber numberWithUnsignedInt:winId];
+    XCBWindow *win = [iconizedWindows objectForKey:key];
+
+    if (win)
+        present = YES;
+    key = nil;
+
+    return present;
+}
+
+- (void)removeFromIconizedWindows:(XCBWindow*)aWindow
+{
+    NSLog(@"Removing window %u", [aWindow window]);
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [iconizedWindows removeObjectForKey:key];
+    key = nil;
+}
+
 - (void)dealloc
 {
     connection = nil;
     window = nil;
     iconizedWindowsContainer = nil;
-    iconizedWindowsArray = nil;
+    iconizedWindows = nil;
     puckUtils = nil;
 
     if (clientList)

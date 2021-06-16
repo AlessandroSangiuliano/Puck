@@ -15,13 +15,13 @@ $(TOOL_NAME)_LD_FLAGS += -L./XCBKit/XCBKit.framkework/
 $(TOOL_NAME)_OBJC_FILES = \
 		main.m \
 		PuckUIHandler.m \
-		PuckEventHandler.m \
+		PuckRunLoop.m \
 		PuckEventHandlerFactory.m \
 		utils/PuckUtils.m \
 
 $(TOOL_NAME)_HEADER_FILES = \
 		PuckUIHandler.h \
-		PuckEventHandler.h \
+		PuckRunLoop.h \
 		PuckEventHandlerFactory.h \
 		utils/PuckUtils.h \
 
