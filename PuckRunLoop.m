@@ -45,7 +45,7 @@
             case XCB_MAP_NOTIFY:
             {
                 xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
-                NSLog(@"Window %u mapped", mapNotify->window);
+                //NSLog(@"Window %u mapped", mapNotify->window);
                 break;
             }
             case XCB_PROPERTY_NOTIFY:

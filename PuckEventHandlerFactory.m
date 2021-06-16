@@ -48,18 +48,26 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[icccmService WMState]] == anEvent->atom)
     {
-        NSNumber *key = [[NSNumber alloc] initWithInt:anEvent->window];
-        XCBWindow *window = [[connection windowsMap] objectForKey:key];
+        NSLog(@"WM STATE for window %u", anEvent->window);
+
+        XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBWindow *frame = [[window queryTree] parentWindow];
+
+        if ([uiHandler inIconizedWindowsWithId:[frame window]])
+        {
+            NSLog(@"TRASA");
+            [uiHandler removeFromIconizedWindows:frame];
+            return;
+        }
 
         XCBPoint position = XCBMakePoint(0,0);
 
         XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
 
         [connection reparentWindow:frame toWindow:iconized position:position];
-        [connection mapWindow:frame];
+        [uiHandler addToIconizedWindows:frame];
 
-        key = nil;
+        //key = nil;
         window = nil;
         iconized = nil;
         frame = nil;
