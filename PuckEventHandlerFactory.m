@@ -77,6 +77,7 @@
 
     atomService = nil;
     ewmhService = nil;
+    icccmService = nil;
 }
 
 - (void)dealloc
