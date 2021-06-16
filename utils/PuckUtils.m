@@ -75,13 +75,27 @@
 
 - (void) encapsulateWindow:(xcb_window_t)aWindow
 {
-    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
-
     NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
+    XCBWindow *window = [[connection windowsMap] objectForKey:key];
+
+    if (window)
+    {
+        window = nil;
+        key = nil;
+        return;
+    }
+
+    window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
     [[connection windowsMap] setObject:window forKey:key];
 
     window = nil;
     key = nil;
+}
+
+- (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask
+{
+    uint32_t val[] = {aMask};
+    [aWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 }
 
 - (void)dealloc

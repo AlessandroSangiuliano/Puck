@@ -35,7 +35,20 @@
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
+    {
         NSLog(@"ClientList");
+        [uiHandler updateClientList];
+
+        int size = [[uiHandler puckUtils] clientListSize];
+        NSLog(@"New client List updated");
+
+        NSArray *windows = [[connection windowsMap] allValues];
+
+        for (int i = 0; i < size; ++i)
+            [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
+
+        windows = nil;
+    }
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientListStacking]] == anEvent->atom)
         NSLog(@"ClientListStacking");
@@ -50,12 +63,13 @@
     {
         NSLog(@"WM STATE for window %u", anEvent->window);
 
+        /*** TODO: Improve the code to handle the normal state or the iconic state ***/
+
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBWindow *frame = [[window queryTree] parentWindow];
 
         if ([uiHandler inIconizedWindowsWithId:[frame window]])
         {
-            NSLog(@"TRASA");
             [uiHandler removeFromIconizedWindows:frame];
             return;
         }
@@ -67,7 +81,6 @@
         [connection reparentWindow:frame toWindow:iconized position:position];
         [uiHandler addToIconizedWindows:frame];
 
-        //key = nil;
         window = nil;
         iconized = nil;
         frame = nil;

@@ -26,12 +26,6 @@
     return self;
 }
 
-- (void) addListenerForWindow:(XCBWindow*)aWindow
-{
-    uint32_t val[] = {DOCKMASK};
-    [aWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
-}
-
 - (void)startEventHandlerLoop
 {
     xcb_generic_event_t *e;

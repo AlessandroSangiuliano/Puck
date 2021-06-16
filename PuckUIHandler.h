@@ -27,5 +27,6 @@
 - (void) addToIconizedWindows:(XCBWindow*)aWindow;
 - (BOOL) inIconizedWindowsWithId:(xcb_window_t)winId;
 - (void) removeFromIconizedWindows:(XCBWindow*)aWindow;
+- (void) updateClientList;
 
 @end
