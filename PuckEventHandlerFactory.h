@@ -7,14 +7,16 @@
 
 #import <Foundation/Foundation.h>
 #import <XCBKit/XCBConnection.h>
+#import "PuckUIHandler.h"
 
 @interface PuckEventHandlerFactory : NSObject
 {
 }
 
 @property (strong, nonatomic) XCBConnection* connection;
+@property (strong, nonatomic) PuckUIHandler *uiHandler;
 
-- (id)initWithConnection:(XCBConnection*)aConnection;
+- (id)initWithConnection:(XCBConnection*)aConnection andUiHandler:(PuckUIHandler*)anUiHandler;
 
 - (void) handlePropertyNotify:(xcb_property_notify_event_t*)anEvent;
 

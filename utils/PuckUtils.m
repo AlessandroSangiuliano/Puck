@@ -40,8 +40,10 @@
                                             length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
-    clientListSize = xcb_get_property_value_length(reply);
     [connection flush];
+
+    for (int i = 0; list[i] != 0; i++)
+        clientListSize = i + 1;
 
     rootWindow = nil;
 
@@ -60,11 +62,26 @@
                                             length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
-    clientListSize = xcb_get_property_value_length(reply);
+    [connection flush];
+
+    for (int i = 0; list[i] != 0; i++)
+        clientListSize = i + 1;
+
 
     rootWindow = nil;
 
     return list;
+}
+
+- (void) encapsulateWindow:(xcb_window_t)aWindow
+{
+    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
+
+    NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
+    [[connection windowsMap] setObject:window forKey:key];
+
+    window = nil;
+    key = nil;
 }
 
 - (void)dealloc

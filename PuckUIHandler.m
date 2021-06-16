@@ -13,6 +13,8 @@
 @synthesize clientList;
 @synthesize puckUtils;
 @synthesize connection;
+@synthesize iconizedWindows;
+@synthesize iconizedWindowsContainer;
 
 - (id)initWithConnection:(XCBConnection*)aConnection
 {
@@ -29,15 +31,12 @@
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
+    iconizedWindows = [[NSMutableDictionary alloc] init];
+
     int size = [puckUtils clientListSize];
 
-    NSLog(@"Windows in the client list with size: %d", size);
-
     for (int i = 0; i < size; ++i)
-    {
-        NSLog(@"%u", clientList[i]);
-    }
-
+        [puckUtils encapsulateWindow:clientList[i]];
 
     return self;
 }
@@ -65,16 +64,33 @@
     [request setValueMask:XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK];
     [request setValueList:values];
 
-    XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:YES];
+    XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:NO];
     window = [response window];
     values[0] = 1;
     values[1] = 0;
 
     [window changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
+
     uint32_t val[] = {DOCKMASK};
     [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 
+    /*** Request for the iconized windows container ***/
+
+    [request setParentWindow:window];
+    [request setXPosition:width - 50];
+    [request setYPosition:height - 58];
+    [request setWidth:width];
+    [request setHeight:height];
+
+    values[0] = [screen screen]->white_pixel;
+    values[1] = FRAMEMASK;
+
+    response = [connection createWindowForRequest:request registerWindow:NO];
+
+    iconizedWindowsContainer = [response window];
+
     [connection mapWindow:window];
+    [connection mapWindow:iconizedWindowsContainer];
     [connection flush];
 
     screen = nil;
@@ -84,10 +100,41 @@
     rootWindow = nil;
 }
 
+- (void)addToIconizedWindows:(XCBWindow*)aWindow
+{
+    NSLog(@"Adding window %u", [aWindow window]);
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [iconizedWindows setObject:aWindow forKey:key];
+    key = nil;
+}
+
+- (BOOL)inIconizedWindowsWithId:(xcb_window_t)winId
+{
+    BOOL present = NO;
+    NSNumber *key = [NSNumber numberWithUnsignedInt:winId];
+    XCBWindow *win = [iconizedWindows objectForKey:key];
+
+    if (win)
+        present = YES;
+    key = nil;
+
+    return present;
+}
+
+- (void)removeFromIconizedWindows:(XCBWindow*)aWindow
+{
+    NSLog(@"Removing window %u", [aWindow window]);
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [iconizedWindows removeObjectForKey:key];
+    key = nil;
+}
+
 - (void)dealloc
 {
     connection = nil;
     window = nil;
+    iconizedWindowsContainer = nil;
+    iconizedWindows = nil;
     puckUtils = nil;
 
     if (clientList)
