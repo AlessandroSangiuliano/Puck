@@ -131,6 +131,7 @@
 
 - (void)updateClientList
 {
+    /*** TODO: CHECK IF THIS LEAKING ***/
     /*if (clientList)
         free(clientList);*/
 
