@@ -17,6 +17,5 @@
 -(id) initWithUIHandler:(PuckUIHandler*)anUiHandler;
 
 - (void) startEventHandlerLoop;
-- (void) addListenerForWindow:(XCBWindow*)aWindow;
 
 @end

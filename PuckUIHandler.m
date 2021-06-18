@@ -129,6 +129,20 @@
     key = nil;
 }
 
+- (void)updateClientList
+{
+    /*if (clientList)
+        free(clientList);*/
+
+    clientList = [puckUtils queryForNetClientList];
+
+    int size = [puckUtils clientListSize];
+
+    for (int i = 0; i < size; ++i)
+        [puckUtils encapsulateWindow:clientList[i]];
+
+}
+
 - (void)dealloc
 {
     connection = nil;

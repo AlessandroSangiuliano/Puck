@@ -35,7 +35,20 @@
     XCBAtomService *atomService = [XCBAtomService sharedInstanceWithConnection:connection];
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
+    {
         NSLog(@"ClientList");
+        [uiHandler updateClientList];
+
+        int size = [[uiHandler puckUtils] clientListSize];
+        NSLog(@"New client List updated");
+
+        NSArray *windows = [[connection windowsMap] allValues];
+
+        for (int i = 0; i < size; ++i)
+            [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
+
+        windows = nil;
+    }
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientListStacking]] == anEvent->atom)
         NSLog(@"ClientListStacking");
@@ -53,27 +66,32 @@
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBWindow *frame = [[window queryTree] parentWindow];
 
-        if ([uiHandler inIconizedWindowsWithId:[frame window]])
+        WindowState wmState = [icccmService wmStateFromWindow:frame];
+
+        switch (wmState)
         {
-            NSLog(@"TRASA");
-            [uiHandler removeFromIconizedWindows:frame];
-            return;
+            case ICCCM_WM_STATE_NORMAL:
+                [uiHandler removeFromIconizedWindows:frame];
+                break;
+            case ICCCM_WM_STATE_ICONIC:
+            {
+                XCBPoint position = XCBMakePoint(0, 0);
+
+                XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
+
+                [connection reparentWindow:frame toWindow:iconized position:position];
+                [uiHandler addToIconizedWindows:frame];
+                iconized = nil;
+                break;
+            }
+            default:
+                break;
         }
 
-        XCBPoint position = XCBMakePoint(0,0);
-
-        XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
-
-        [connection reparentWindow:frame toWindow:iconized position:position];
-        [uiHandler addToIconizedWindows:frame];
-
-        //key = nil;
         window = nil;
-        iconized = nil;
         frame = nil;
+
     }
-
-
 
     atomService = nil;
     ewmhService = nil;

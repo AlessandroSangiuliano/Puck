@@ -28,9 +28,7 @@ int main(int argc, const char * argv[])
         NSArray *windows = [[connection windowsMap] allValues];
 
         for (int i = 0; i < size; ++i)
-        {
-            [puckRunLoop addListenerForWindow:[windows objectAtIndex:i]];
-        }
+            [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
 
         windows = nil;
 
