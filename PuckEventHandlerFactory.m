@@ -63,30 +63,35 @@
     {
         NSLog(@"WM STATE for window %u", anEvent->window);
 
-        /*** TODO: Improve the code to handle the normal state or the iconic state ***/
-
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBWindow *frame = [[window queryTree] parentWindow];
 
-        if ([uiHandler inIconizedWindowsWithId:[frame window]])
+        WindowState wmState = [icccmService wmStateFromWindow:frame];
+
+        switch (wmState)
         {
-            [uiHandler removeFromIconizedWindows:frame];
-            return;
+            case ICCCM_WM_STATE_NORMAL:
+                [uiHandler removeFromIconizedWindows:frame];
+                break;
+            case ICCCM_WM_STATE_ICONIC:
+            {
+                XCBPoint position = XCBMakePoint(0, 0);
+
+                XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
+
+                [connection reparentWindow:frame toWindow:iconized position:position];
+                [uiHandler addToIconizedWindows:frame];
+                iconized = nil;
+                break;
+            }
+            default:
+                break;
         }
 
-        XCBPoint position = XCBMakePoint(0,0);
-
-        XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
-
-        [connection reparentWindow:frame toWindow:iconized position:position];
-        [uiHandler addToIconizedWindows:frame];
-
         window = nil;
-        iconized = nil;
         frame = nil;
+
     }
-
-
 
     atomService = nil;
     ewmhService = nil;
