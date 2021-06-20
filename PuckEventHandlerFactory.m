@@ -40,12 +40,19 @@
         [uiHandler updateClientList];
 
         int size = [[uiHandler puckUtils] clientListSize];
-        NSLog(@"New client List updated");
 
         NSArray *windows = [[connection windowsMap] allValues];
+        //NSLog(@"New client List updated and size: %d, and array: %lu", size, [windows count]);
+        
+        //TODO: stampare la windows map e la client list
 
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < [windows count]; ++i)
+        {
+            XCBWindow *win = [windows objectAtIndex:i];
+            NSLog(@"Add listener for window %u", [win window]);
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
+            win = nil;
+        }
 
         windows = nil;
     }
@@ -62,19 +69,23 @@
     if ([atomService atomFromCachedAtomsWithKey:[icccmService WMState]] == anEvent->atom)
     {
         NSLog(@"WM STATE for window %u", anEvent->window);
+        WindowState wmState = -1;
 
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBWindow *frame = [[window queryTree] parentWindow];
-
-        WindowState wmState = [icccmService wmStateFromWindow:frame];
+    
+        if (frame)
+            wmState = [icccmService wmStateFromWindow:frame];
 
         switch (wmState)
         {
             case ICCCM_WM_STATE_NORMAL:
+                NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
                 [uiHandler removeFromIconizedWindows:frame];
                 break;
             case ICCCM_WM_STATE_ICONIC:
             {
+                NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
                 XCBPoint position = XCBMakePoint(0, 0);
 
                 XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
