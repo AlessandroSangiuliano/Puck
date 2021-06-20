@@ -136,11 +136,14 @@
         free(clientList);*/
 
     clientList = [puckUtils queryForNetClientList];
+    [[connection windowsMap]  removeAllObjects];
 
     int size = [puckUtils clientListSize];
-
+    
     for (int i = 0; i < size; ++i)
-        [puckUtils encapsulateWindow:clientList[i]];
+        if (clientList[i] != 0)
+            [puckUtils encapsulateWindow:clientList[i]];
+    
 
 }
 

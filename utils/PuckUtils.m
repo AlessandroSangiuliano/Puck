@@ -38,13 +38,15 @@
                                          forWindow:rootWindow
                                             delete:NO
                                             length:UINT32_MAX];
+    
+    //FIXME: free the reply;
 
     xcb_window_t *list = xcb_get_property_value(reply);
+    clientListSize = xcb_get_property_value_length(reply) / 4;
     [connection flush];
-
-    for (int i = 0; list[i] != 0; i++)
-        clientListSize = i + 1;
-
+    
+    NSLog(@"Client size direct %d", clientListSize);
+    
     rootWindow = nil;
 
     return list;
@@ -62,12 +64,10 @@
                                             length:UINT32_MAX];
 
     xcb_window_t *list = xcb_get_property_value(reply);
+    
+    clientListSize = xcb_get_property_value_length(reply) / 4;
     [connection flush];
-
-    for (int i = 0; list[i] != 0; i++)
-        clientListSize = i + 1;
-
-
+    
     rootWindow = nil;
 
     return list;
@@ -76,17 +76,10 @@
 - (void) encapsulateWindow:(xcb_window_t)aWindow
 {
     NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
-    XCBWindow *window = [[connection windowsMap] objectForKey:key];
 
-    if (window)
-    {
-        window = nil;
-        key = nil;
-        return;
-    }
-
-    window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
+    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
     [[connection windowsMap] setObject:window forKey:key];
+    
 
     window = nil;
     key = nil;
