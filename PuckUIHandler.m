@@ -73,6 +73,10 @@
 
     uint32_t val[] = {DOCKMASK};
     [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
+    
+    [window stackAbove];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    [ewmhService updateNetWmState:window];
 
     /*** Request for the iconized windows container ***/
 
@@ -98,6 +102,7 @@
     response = nil;
     visual = nil;
     rootWindow = nil;
+    ewmhService = nil;
 }
 
 - (void)addToIconizedWindows:(XCBWindow*)aWindow
