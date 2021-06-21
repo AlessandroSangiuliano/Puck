@@ -102,6 +102,7 @@
     response = nil;
     visual = nil;
     rootWindow = nil;
+    ewmhService = nil;
 }
 
 - (void)addToIconizedWindows:(XCBWindow*)aWindow
