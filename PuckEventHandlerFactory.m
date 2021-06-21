@@ -38,11 +38,8 @@
     {
         NSLog(@"ClientList");
         [uiHandler updateClientList];
-
-        int size = [[uiHandler puckUtils] clientListSize];
-
+        
         NSArray *windows = [[connection windowsMap] allValues];
-        //NSLog(@"New client List updated and size: %d, and array: %lu", size, [windows count]);
         
         //TODO: stampare la windows map e la client list
 
