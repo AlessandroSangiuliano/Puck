@@ -83,13 +83,7 @@
             case ICCCM_WM_STATE_ICONIC:
             {
                 NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
-                XCBPoint position = XCBMakePoint(0, 0);
-
-                XCBWindow *iconized = [uiHandler iconizedWindowsContainer];
-
-                [connection reparentWindow:frame toWindow:iconized position:position];
-                [uiHandler addToIconizedWindows:frame];
-                iconized = nil;
+                [uiHandler addToIconizedWindows:frame andResize:Enlarge];
                 break;
             }
             default:
