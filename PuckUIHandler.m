@@ -110,7 +110,7 @@
 
 - (void)resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize
 {
-    /*** for the main dockbar window ***/
+    /*** for the main dockbar window we calculate the new size, while the position is given by the aPosition argument ***/
     
     XCBSize newMainSize = XCBMakeSize([window windowRect].size.width + 50 + OFFSET*2 + 3, aSize.height);
     
@@ -120,7 +120,7 @@
     [window setMaximizedVertically:NO];
     [window setMaximizedHorizontally:NO];
     
-    /*** for the iconified container ***/
+    /*** for the iconified container we keep the same position and give to it the size from the aSize paramenter ***/
     
     [iconizedWindowsContainer maximizeToSize:aSize andPosition:[iconizedWindowsContainer windowRect].position];
     [iconizedWindowsContainer setIsMaximized:NO];
@@ -152,8 +152,8 @@
             {
                 XCBRect rect = [iconizedWindowsContainer windowRect];
                 XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x - 50) + OFFSET*2 + 3, [window windowRect].position.y);
-                XCBSize newIconofiedSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
-                [self resizeToPosition:newMainWindowPos andSize:newIconofiedSize];
+                XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
+                [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize];
                 XCBPoint repPos = XCBMakePoint([iconizedWindowsContainer windowRect].size.width - 50 - OFFSET, 0);
                 [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:repPos];
                 [connection flush];
