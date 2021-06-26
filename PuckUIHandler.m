@@ -81,9 +81,9 @@
     /*** Request for the iconized windows container ***/
 
     [request setParentWindow:window];
-    [request setXPosition:width - 50];
+    [request setXPosition:width - 58];
     [request setYPosition:height - 58];
-    [request setWidth:width];
+    [request setWidth:56];
     [request setHeight:height];
 
     values[0] = [screen screen]->white_pixel;
@@ -92,6 +92,9 @@
     response = [connection createWindowForRequest:request registerWindow:NO];
 
     iconizedWindowsContainer = [response window];
+    
+    [window description];
+    [iconizedWindowsContainer description];
 
     [connection mapWindow:window];
     [connection mapWindow:iconizedWindowsContainer];
@@ -105,11 +108,68 @@
     ewmhService = nil;
 }
 
-- (void)addToIconizedWindows:(XCBWindow*)aWindow
+- (void)resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize
+{
+    /*** for the main dockbar window we calculate the new size, while the position is given by the aPosition argument ***/
+    
+    XCBSize newMainSize = XCBMakeSize([window windowRect].size.width + 50 + OFFSET*2 + 3, aSize.height);
+    
+    [window maximizeToSize:newMainSize andPosition:aPosition];
+    [window setIsMaximized:NO];
+    [window setFullScreen:NO];
+    [window setMaximizedVertically:NO];
+    [window setMaximizedHorizontally:NO];
+    
+    /*** for the iconified container we keep the same position and give to it the size from the aSize paramenter ***/
+    
+    [iconizedWindowsContainer maximizeToSize:aSize andPosition:[iconizedWindowsContainer windowRect].position];
+    [iconizedWindowsContainer setIsMaximized:NO];
+    [iconizedWindowsContainer setFullScreen:NO];
+    [iconizedWindowsContainer setMaximizedVertically:NO];
+    [iconizedWindowsContainer setMaximizedHorizontally:NO];
+    
+   
+    
+}
+
+- (void)addToIconizedWindows:(XCBWindow*)aWindow andResize:(Resize)aValue
 {
     NSLog(@"Adding window %u", [aWindow window]);
+    
+    BOOL needResize = NO;
+    
+    if ([iconizedWindows count] != 0)
+        needResize = YES;
+    
     NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
     [iconizedWindows setObject:aWindow forKey:key];
+    
+    if (needResize)
+    {
+        switch (aValue)
+        {
+            case Enlarge:
+            {
+                XCBRect rect = [iconizedWindowsContainer windowRect];
+                XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x - 50) + OFFSET*2 + 3, [window windowRect].position.y);
+                XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
+                [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize];
+                XCBPoint repPos = XCBMakePoint([iconizedWindowsContainer windowRect].size.width - 50 - OFFSET, 0);
+                [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:repPos];
+                [connection flush];
+                break;
+            }
+            case Reduce:
+            {
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    else
+        [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:XCBMakePoint(0,0)];
+    
     key = nil;
 }
 
