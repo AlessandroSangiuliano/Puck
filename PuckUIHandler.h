@@ -26,10 +26,10 @@
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
-- (void) addToIconizedWindows:(XCBWindow*)aWindow andResize:(Resize)aValue;
+- (void) addToIconizedWindows:(XCBWindow*)aWindow;
 - (BOOL) inIconizedWindowsWithId:(xcb_window_t)winId;
 - (void) removeFromIconizedWindows:(XCBWindow*)aWindow;
 - (void) updateClientList;
-- (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize;
+- (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize;
 
 @end

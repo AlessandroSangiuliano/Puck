@@ -108,11 +108,16 @@
     ewmhService = nil;
 }
 
-- (void)resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize
+- (void)resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize
 {
     /*** for the main dockbar window we calculate the new size, while the position is given by the aPosition argument ***/
     
-    XCBSize newMainSize = XCBMakeSize([window windowRect].size.width + 50 + OFFSET*2 + 3, aSize.height);
+    XCBSize newMainSize;
+    
+    if (aResize == Enlarge)
+        newMainSize = XCBMakeSize([window windowRect].size.width + 50 + OFFSET*2 + 3, aSize.height);
+    else
+        newMainSize = XCBMakeSize([window windowRect].size.width - 50 - OFFSET*2 - 3, aSize.height);
     
     [window maximizeToSize:newMainSize andPosition:aPosition];
     [window setIsMaximized:NO];
@@ -132,7 +137,7 @@
     
 }
 
-- (void)addToIconizedWindows:(XCBWindow*)aWindow andResize:(Resize)aValue
+- (void)addToIconizedWindows:(XCBWindow*)aWindow
 {
     NSLog(@"Adding window %u", [aWindow window]);
     
@@ -146,29 +151,40 @@
     
     if (needResize)
     {
-        switch (aValue)
-        {
-            case Enlarge:
-            {
-                XCBRect rect = [iconizedWindowsContainer windowRect];
-                XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x - 50) + OFFSET*2 + 3, [window windowRect].position.y);
-                XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
-                [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize];
-                XCBPoint repPos = XCBMakePoint([iconizedWindowsContainer windowRect].size.width - 50 - OFFSET, 0);
-                [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:repPos];
-                [connection flush];
-                break;
-            }
-            case Reduce:
-            {
-                break;
-            }
-            default:
-                break;
-        }
+        XCBRect rect = [iconizedWindowsContainer windowRect];
+        XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x - 50) + OFFSET*2 + 3, [window windowRect].position.y);
+        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
+        [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Enlarge];
+        XCBPoint repPos = XCBMakePoint([iconizedWindowsContainer windowRect].size.width - 50 - OFFSET, 0);
+        [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:repPos];
+        [connection flush];
+    
     }
     else
         [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:XCBMakePoint(0,0)];
+    
+    key = nil;
+}
+
+- (void)removeFromIconizedWindows:(XCBWindow*)aWindow
+{
+    NSLog(@"Removing window %u", [aWindow window]);
+    BOOL needResize = NO;
+    
+    if ([iconizedWindows count] > 1)
+        needResize = YES;
+    
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [iconizedWindows removeObjectForKey:key];
+    
+    if (needResize)
+    {
+        XCBRect rect = [iconizedWindowsContainer windowRect];
+        XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x + 50) - OFFSET*2 - 3, [window windowRect].position.y);
+        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width - 50 - OFFSET*2 - 3, rect.size.height);
+        [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Reduce];
+        [connection flush];
+    }
     
     key = nil;
 }
@@ -186,19 +202,12 @@
     return present;
 }
 
-- (void)removeFromIconizedWindows:(XCBWindow*)aWindow
-{
-    NSLog(@"Removing window %u", [aWindow window]);
-    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
-    [iconizedWindows removeObjectForKey:key];
-    key = nil;
-}
-
 - (void)updateClientList
 {
     /*** TODO: CHECK IF THIS LEAKING ***/
-    /*if (clientList)
-        free(clientList);*/
+    
+    if (clientList)
+        free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
     [[connection windowsMap]  removeAllObjects];
@@ -208,8 +217,7 @@
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
             [puckUtils encapsulateWindow:clientList[i]];
-    
-
+        
 }
 
 - (void)dealloc

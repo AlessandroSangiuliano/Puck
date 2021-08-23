@@ -41,7 +41,7 @@
         
         NSArray *windows = [[connection windowsMap] allValues];
         
-        //TODO: stampare la windows map e la client list
+        //TODO: print the windows map and the client list
 
         for (int i = 0; i < [windows count]; ++i)
         {
@@ -83,7 +83,7 @@
             case ICCCM_WM_STATE_ICONIC:
             {
                 NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
-                [uiHandler addToIconizedWindows:frame andResize:Enlarge];
+                [uiHandler addToIconizedWindows:frame];
                 break;
             }
             default:
