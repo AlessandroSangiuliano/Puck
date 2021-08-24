@@ -22,15 +22,16 @@
 @property (nonatomic, assign) xcb_window_t *clientList;
 @property (strong, nonatomic) PuckUtils *puckUtils;
 @property (strong, nonatomic) XCBConnection *connection;
-@property (strong, nonatomic) NSMutableDictionary *iconizedWindows;
+@property (strong, nonatomic) NSMutableArray *iconizedWindows;
 
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
-- (void) addToIconizedWindows:(XCBWindow*)aWindow;
-- (BOOL) inIconizedWindowsWithId:(xcb_window_t)winId;
+- (void)addToIconizedWindowsContainer:(XCBWindow*)aWindow;
 - (BOOL) isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow;
-- (void) removeFromIconizedWindows:(XCBWindow*)aWindow;
+- (void)removeFromIconizedWindowsContainer:(XCBWindow*)aWindow;
 - (void) updateClientList;
 - (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize;
+- (void) removeFromIconizedWindowsById:(xcb_window_t)winId;
+- (XCBWindow*) windowFromIconizedById:(xcb_window_t)winId;
 
 @end
