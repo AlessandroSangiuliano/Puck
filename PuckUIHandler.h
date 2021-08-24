@@ -28,6 +28,7 @@
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
 - (void) addToIconizedWindows:(XCBWindow*)aWindow;
 - (BOOL) inIconizedWindowsWithId:(xcb_window_t)winId;
+- (BOOL) isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow;
 - (void) removeFromIconizedWindows:(XCBWindow*)aWindow;
 - (void) updateClientList;
 - (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize;

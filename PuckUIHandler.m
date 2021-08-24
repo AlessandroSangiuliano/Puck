@@ -174,6 +174,8 @@
     if ([iconizedWindows count] > 1)
         needResize = YES;
     
+    [self isIconizedInFirstOrLastPosition:window];
+    
     NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
     [iconizedWindows removeObjectForKey:key];
     
@@ -197,9 +199,32 @@
 
     if (win)
         present = YES;
+    
     key = nil;
 
     return present;
+}
+
+- (BOOL)isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow
+{
+    /*if (![self inIconizedWindowsWithId:[aWindow window]])
+    {
+        NSLog(@"Window is not iconized!");
+        return NO;
+    }*/
+    //TODO: probabilmente meglio passare all'utilizzo di un array o aggiungerne uno di supporto
+    NSArray *iconez = [iconizedWindows allValues];
+    
+    for (int i = 0; i < [iconez count]; ++i)
+    {
+        XCBWindow *win = [iconez objectAtIndex:i];
+        NSLog(@"Iconized %u", [win window]);
+        win = nil;
+    }
+    
+    iconez = nil;
+    
+    return YES;
 }
 
 - (void)updateClientList
