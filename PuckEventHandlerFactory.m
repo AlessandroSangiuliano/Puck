@@ -78,12 +78,12 @@
         {
             case ICCCM_WM_STATE_NORMAL:
                 NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
-                [uiHandler removeFromIconizedWindows:frame];
+                [uiHandler removeFromIconizedWindowsContainer:frame];
                 break;
             case ICCCM_WM_STATE_ICONIC:
             {
                 NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
-                [uiHandler addToIconizedWindows:frame];
+                [uiHandler addToIconizedWindowsContainer:frame];
                 break;
             }
             default:

@@ -31,7 +31,7 @@
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
-    iconizedWindows = [[NSMutableDictionary alloc] init];
+    iconizedWindows = [[NSMutableArray alloc] init];
 
     int size = [puckUtils clientListSize];
 
@@ -132,12 +132,9 @@
     [iconizedWindowsContainer setFullScreen:NO];
     [iconizedWindowsContainer setMaximizedVertically:NO];
     [iconizedWindowsContainer setMaximizedHorizontally:NO];
-    
-   
-    
 }
 
-- (void)addToIconizedWindows:(XCBWindow*)aWindow
+- (void)addToIconizedWindowsContainer:(XCBWindow*)aWindow
 {
     NSLog(@"Adding window %u", [aWindow window]);
     
@@ -146,8 +143,9 @@
     if ([iconizedWindows count] != 0)
         needResize = YES;
     
-    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
-    [iconizedWindows setObject:aWindow forKey:key];
+    [iconizedWindows addObject:aWindow];
+    
+    NSLog(@"Size: %lu", [iconizedWindows count]);
     
     if (needResize)
     {
@@ -163,10 +161,9 @@
     else
         [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:XCBMakePoint(0,0)];
     
-    key = nil;
 }
 
-- (void)removeFromIconizedWindows:(XCBWindow*)aWindow
+- (void)removeFromIconizedWindowsContainer:(XCBWindow*)aWindow
 {
     NSLog(@"Removing window %u", [aWindow window]);
     BOOL needResize = NO;
@@ -176,8 +173,7 @@
     
     [self isIconizedInFirstOrLastPosition:window];
     
-    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
-    [iconizedWindows removeObjectForKey:key];
+    [self removeFromIconizedWindowsById:[aWindow window]];
     
     if (needResize)
     {
@@ -187,44 +183,60 @@
         [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Reduce];
         [connection flush];
     }
-    
-    key = nil;
 }
 
-- (BOOL)inIconizedWindowsWithId:(xcb_window_t)winId
+- (void)removeFromIconizedWindowsById:(xcb_window_t)winId
 {
-    BOOL present = NO;
-    NSNumber *key = [NSNumber numberWithUnsignedInt:winId];
-    XCBWindow *win = [iconizedWindows objectForKey:key];
-
-    if (win)
-        present = YES;
+    int size = [iconizedWindows count];
     
-    key = nil;
+    NSLog(@"Size before removing: %d", size);
+    
+    for (int i = 0; i < size; ++i)
+    {
+        XCBWindow *win = [iconizedWindows objectAtIndex:i];
+        
+        if ([win window] == winId)
+        {
+            [iconizedWindows removeObjectAtIndex:i];
+            win = nil;
+            break;
+        }
+        
+        win = nil;
+    }
+}
 
-    return present;
+- (XCBWindow *)windowFromIconizedById:(xcb_window_t)winId
+{
+    XCBWindow *win;
+    int size = [iconizedWindows count];
+    
+    for (int i = 0; i < size; ++i)
+    {
+        win = [iconizedWindows objectAtIndex:i];
+        
+        if ([win window] == winId)
+            return win;
+        
+        win = nil;
+    }
+    
+    return win;
 }
 
 - (BOOL)isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow
 {
-    /*if (![self inIconizedWindowsWithId:[aWindow window]])
-    {
-        NSLog(@"Window is not iconized!");
-        return NO;
-    }*/
-    //TODO: probabilmente meglio passare all'utilizzo di un array o aggiungerne uno di supporto
-    NSArray *iconez = [iconizedWindows allValues];
+    XCBWindow *first;
+    XCBWindow *last;
+    BOOL firstOrLast = NO;
     
-    for (int i = 0; i < [iconez count]; ++i)
-    {
-        XCBWindow *win = [iconez objectAtIndex:i];
-        NSLog(@"Iconized %u", [win window]);
-        win = nil;
-    }
+    first = [iconizedWindows firstObject];
+    last = [iconizedWindows lastObject];
     
-    iconez = nil;
+    if ([first window] == [aWindow window] || [last window] == [aWindow window])
+        firstOrLast = YES;
     
-    return YES;
+    return firstOrLast;
 }
 
 - (void)updateClientList
