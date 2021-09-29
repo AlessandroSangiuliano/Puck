@@ -46,7 +46,7 @@
         for (int i = 0; i < [windows count]; ++i)
         {
             XCBWindow *win = [windows objectAtIndex:i];
-            NSLog(@"Add listener for window %u", [win window]);
+            NSLog(@"Add listener for dockWindow %u", [win window]);
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
             win = nil;
         }
@@ -65,7 +65,7 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[icccmService WMState]] == anEvent->atom)
     {
-        NSLog(@"WM STATE for window %u", anEvent->window);
+        NSLog(@"WM STATE for dockWindow %u", anEvent->window);
         WindowState wmState = -1;
 
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
@@ -77,12 +77,12 @@
         switch (wmState)
         {
             case ICCCM_WM_STATE_NORMAL:
-                NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
+                NSLog(@"Normal state for dockWindow: %u and frame: %u", [window window], [frame window]);
                 [uiHandler removeFromIconizedWindowsContainer:frame];
                 break;
             case ICCCM_WM_STATE_ICONIC:
             {
-                NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
+                NSLog(@"Normal state for dockWindow: %u and frame: %u", [window window], [frame window]);
                 [uiHandler addToIconizedWindowsContainer:frame];
                 break;
             }
