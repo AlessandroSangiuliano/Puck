@@ -107,7 +107,14 @@
                     XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
                     XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
                     [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
-                    
+                    [connection flush];
+                }
+                
+                /*** if forl and is not followed by other windows then it is in first position so just remove the window without resizing the dockbar ***/
+                
+                if (!needResize && ![uiHandler isFollowedByAnotherWindow:frame] && forl)
+                {
+                    [uiHandler removeFromIconizedWindowsById:[frame window]];
                     [connection flush];
                 }
                 
