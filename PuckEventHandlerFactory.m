@@ -108,6 +108,7 @@
                     XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
                     [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
                     [connection flush];
+                    needResize = NO;
                 }
                 
                 /*** if forl and is not followed by other windows then it is in first position so just remove the window without resizing the dockbar ***/
@@ -116,6 +117,23 @@
                 {
                     [uiHandler removeFromIconizedWindowsById:[frame window]];
                     [connection flush];
+                    needResize = NO;
+                }
+                
+                /*** if forl and need resize and the window is not followed by other windows then it is in last position, so resize the dockbar ***/
+                
+                if (forl && needResize && ![uiHandler isFollowedByAnotherWindow:frame])
+                {
+                    [uiHandler removeFromIconizedWindowsById:[frame window]];
+                    
+                    /*** resize the dock ***/
+                    
+                    XCBRect iconizedContainerRect = [iconizedContainerWindow windowRect];
+                    XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
+                    XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
+                    [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
+                    [connection flush];
+                    needResize = NO;
                 }
                 
                 dockWindow = nil;
