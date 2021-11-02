@@ -5,16 +5,33 @@
 // Created by slex on 28/05/21.
 
 #import "PuckUIHandler.h"
+#import <XCBKit/XCBFrame.h>
+#import "functions/Functions.h"
 
 
 @implementation PuckUIHandler
 
-@synthesize window;
+@synthesize dockWindow;
 @synthesize clientList;
 @synthesize puckUtils;
 @synthesize connection;
 @synthesize iconizedWindows;
 @synthesize iconizedWindowsContainer;
+
+- (instancetype)init
+{
+    self = [super init];
+
+    if (self == nil)
+    {
+        NSLog(@"Unable to init...");
+        return nil;
+    }
+    
+    iconizedWindows = [[NSMutableArray alloc] init];
+    
+    return self;
+}
 
 - (id)initWithConnection:(XCBConnection*)aConnection
 {
@@ -31,7 +48,7 @@
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
-    iconizedWindows = [[NSMutableDictionary alloc] init];
+    iconizedWindows = [[NSMutableArray alloc] init];
 
     int size = [puckUtils clientListSize];
 
@@ -65,22 +82,22 @@
     [request setValueList:values];
 
     XCBWindowTypeResponse *response = [connection createWindowForRequest:request registerWindow:NO];
-    window = [response window];
+    dockWindow = [response window];
     values[0] = 1;
     values[1] = 0;
 
-    [window changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
+    [dockWindow changeAttributes:values withMask:XCB_CW_OVERRIDE_REDIRECT checked:NO];
 
     uint32_t val[] = {DOCKMASK};
     [rootWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
     
-    [window stackAbove];
+    [dockWindow stackAbove];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    [ewmhService updateNetWmState:window];
+    [ewmhService updateNetWmState:dockWindow];
 
     /*** Request for the iconized windows container ***/
 
-    [request setParentWindow:window];
+    [request setParentWindow:dockWindow];
     [request setXPosition:width - 58];
     [request setYPosition:height - 58];
     [request setWidth:56];
@@ -93,10 +110,10 @@
 
     iconizedWindowsContainer = [response window];
     
-    [window description];
+    [dockWindow description];
     [iconizedWindowsContainer description];
 
-    [connection mapWindow:window];
+    [connection mapWindow:dockWindow];
     [connection mapWindow:iconizedWindowsContainer];
     [connection flush];
 
@@ -110,20 +127,20 @@
 
 - (void)resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize
 {
-    /*** for the main dockbar window we calculate the new size, while the position is given by the aPosition argument ***/
+    /*** for the main dockbar dockWindow we calculate the new size, while the position is given by the aPosition argument ***/
     
     XCBSize newMainSize;
     
     if (aResize == Enlarge)
-        newMainSize = XCBMakeSize([window windowRect].size.width + 50 + OFFSET*2 + 3, aSize.height);
+        newMainSize = XCBMakeSize([dockWindow windowRect].size.width + 50 + OFFSET * 2 + 3, aSize.height);
     else
-        newMainSize = XCBMakeSize([window windowRect].size.width - 50 - OFFSET*2 - 3, aSize.height);
+        newMainSize = XCBMakeSize([dockWindow windowRect].size.width - 50 - OFFSET * 2 - 3, aSize.height);
     
-    [window maximizeToSize:newMainSize andPosition:aPosition];
-    [window setIsMaximized:NO];
-    [window setFullScreen:NO];
-    [window setMaximizedVertically:NO];
-    [window setMaximizedHorizontally:NO];
+    [dockWindow maximizeToSize:newMainSize andPosition:aPosition];
+    [dockWindow setIsMaximized:NO];
+    [dockWindow setFullScreen:NO];
+    [dockWindow setMaximizedVertically:NO];
+    [dockWindow setMaximizedHorizontally:NO];
     
     /*** for the iconified container we keep the same position and give to it the size from the aSize paramenter ***/
     
@@ -132,12 +149,9 @@
     [iconizedWindowsContainer setFullScreen:NO];
     [iconizedWindowsContainer setMaximizedVertically:NO];
     [iconizedWindowsContainer setMaximizedHorizontally:NO];
-    
-   
-    
 }
 
-- (void)addToIconizedWindows:(XCBWindow*)aWindow
+- (void)addToIconizedWindowsContainer:(XCBWindow*)aWindow
 {
     NSLog(@"Adding window %u", [aWindow window]);
     
@@ -146,14 +160,13 @@
     if ([iconizedWindows count] != 0)
         needResize = YES;
     
-    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
-    [iconizedWindows setObject:aWindow forKey:key];
+    [iconizedWindows addObject:aWindow];
     
     if (needResize)
     {
         XCBRect rect = [iconizedWindowsContainer windowRect];
-        XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x - 50) + OFFSET*2 + 3, [window windowRect].position.y);
-        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
+        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y); //TODO: CHECK If bette + OFFSET etc etc or - OFFSET etc etc
+        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET * 2 + 3, rect.size.height);
         [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Enlarge];
         XCBPoint repPos = XCBMakePoint([iconizedWindowsContainer windowRect].size.width - 50 - OFFSET, 0);
         [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:repPos];
@@ -163,44 +176,169 @@
     else
         [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:XCBMakePoint(0,0)];
     
-    key = nil;
 }
 
-- (void)removeFromIconizedWindows:(XCBWindow*)aWindow
+- (void)removeFromIconizedWindowsById:(xcb_window_t)winId
 {
-    NSLog(@"Removing window %u", [aWindow window]);
-    BOOL needResize = NO;
+    int size = [iconizedWindows count];
     
-    if ([iconizedWindows count] > 1)
-        needResize = YES;
+    NSLog(@"Size before removing: %d", size);
     
-    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
-    [iconizedWindows removeObjectForKey:key];
-    
-    if (needResize)
+    for (int i = 0; i < size; ++i)
     {
-        XCBRect rect = [iconizedWindowsContainer windowRect];
-        XCBPoint newMainWindowPos = XCBMakePoint(([window windowRect].position.x + 50) - OFFSET*2 - 3, [window windowRect].position.y);
-        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width - 50 - OFFSET*2 - 3, rect.size.height);
-        [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Reduce];
-        [connection flush];
+        XCBWindow *win = [iconizedWindows objectAtIndex:i];
+        
+        if ([win window] == winId)
+        {
+            [iconizedWindows removeObjectAtIndex:i];
+            win = nil;
+            break;
+        }
+        
+        win = nil;
+    }
+}
+
+- (XCBWindow *)windowFromIconizedById:(xcb_window_t)winId
+{
+    XCBWindow *win;
+    int size = [iconizedWindows count];
+    
+    for (int i = 0; i < size; ++i)
+    {
+        win = [iconizedWindows objectAtIndex:i];
+        
+        if ([win window] == winId)
+            return win;
+        
+        win = nil;
     }
     
-    key = nil;
+    return win;
 }
 
-- (BOOL)inIconizedWindowsWithId:(xcb_window_t)winId
+- (BOOL)isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow
 {
-    BOOL present = NO;
-    NSNumber *key = [NSNumber numberWithUnsignedInt:winId];
-    XCBWindow *win = [iconizedWindows objectForKey:key];
-
-    if (win)
-        present = YES;
-    key = nil;
-
-    return present;
+    XCBWindow *first;
+    XCBWindow *last;
+    BOOL firstOrLast = NO;
+    
+    first = [iconizedWindows firstObject];
+    last = [iconizedWindows lastObject];
+    
+    if ([first window] == [aWindow window] || [last window] == [aWindow window])
+        firstOrLast = YES;
+    
+    return firstOrLast;
 }
+
+- (BOOL)isFollowedByAnotherWindow:(XCBWindow *)originWindow
+{
+    BOOL followed = NO;
+    
+    int arraySize = [iconizedWindows count];
+    
+    if (arraySize == 1)
+        return followed;
+    
+    if (arraySize > 1)
+    {
+        for (int i = 0; i < arraySize; ++i)
+        {
+            XCBWindow *auxWin = [iconizedWindows objectAtIndex:i];
+            XCBWindow *lastWindow = [iconizedWindows lastObject];
+            
+            if ([originWindow window] == [auxWin window] && [originWindow window] != [lastWindow window])
+            {
+                XCBWindow *following = [iconizedWindows objectAtIndex:i+1];
+                
+                if (following != nil)
+                {
+                    followed = YES;
+                    following = nil;
+                    auxWin = nil;
+                    lastWindow = nil;
+                    break;
+                }
+            }
+            else if ([originWindow window] == [lastWindow window])
+            {
+                auxWin = nil;
+                lastWindow = nil;
+                return followed;
+            }
+            
+            auxWin = nil;
+            lastWindow = nil;
+        }
+    }
+    
+    return followed;
+}
+
+- (NSInteger) countFollowingWindowsForWindow:(XCBWindow *)aWindow
+{
+    NSInteger following = 0;
+    
+    int arraySize = [iconizedWindows count];
+    
+    XCBWindow *lastWindow = [iconizedWindows lastObject];
+    
+    if (arraySize == 1 || [aWindow window] == [lastWindow window])
+    {
+        lastWindow = nil;
+        return following;
+    }
+    
+    if (arraySize > 1)
+    {
+        for (int i = 0; i < arraySize; ++i)
+        {
+            XCBWindow *auxWin = [iconizedWindows objectAtIndex:i];
+            
+            if ([aWindow window] == [auxWin window])
+            {
+                following = arraySize - (i + 1);
+                auxWin = nil;
+                break;
+            }
+        }
+    }
+    
+    lastWindow = nil;
+    return following;
+}
+
+- (void) moveFollowingWindows:(NSInteger) followingQuantity forWindow:(XCBWindow *)originWindow
+{
+    NSInteger winPosition = FnIndexOfWindow(iconizedWindows, originWindow);
+    
+    for (int i = 0; i < followingQuantity; ++i)
+    {
+        winPosition++;
+        XCBWindow *moving = [iconizedWindows objectAtIndex:winPosition];
+        /*** XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y); ***/
+        XCBPoint newPosition = FnCalculateNewPosition(moving, OFFSET);
+        [self moveWindow:moving toPosition:newPosition];
+        moving = nil;
+    }
+    
+}
+
+- (void)moveWindow:(XCBWindow *)aWindow toPosition:(XCBPoint)aPosition
+{
+    int32_t values[] = {aPosition.x, aPosition.y};
+
+    xcb_configure_window([connection connection], [aWindow window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+
+    XCBRect newRect = XCBMakeRect(aPosition, XCBMakeSize([aWindow windowRect].size.width, [aWindow windowRect].size.height));
+    [aWindow setWindowRect:newRect];
+
+    [aWindow setOriginalRect:XCBMakeRect(XCBMakePoint(aPosition.x, aPosition.y),
+                                       XCBMakeSize([aWindow originalRect].size.width,
+                                                   [aWindow originalRect].size.height))];
+}
+
 
 - (void)updateClientList
 {
@@ -222,8 +360,8 @@
 
 - (void)dealloc
 {
-    connection = nil;
-    window = nil;
+    connection               = nil;
+    dockWindow               = nil;
     iconizedWindowsContainer = nil;
     iconizedWindows = nil;
     puckUtils = nil;
