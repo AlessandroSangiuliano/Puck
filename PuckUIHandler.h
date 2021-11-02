@@ -17,19 +17,25 @@
 {
 }
 
-@property (strong, nonatomic) XCBWindow *window;
+@property (strong, nonatomic) XCBWindow *dockWindow;
 @property (strong, nonatomic) XCBWindow *iconizedWindowsContainer;
 @property (nonatomic, assign) xcb_window_t *clientList;
 @property (strong, nonatomic) PuckUtils *puckUtils;
 @property (strong, nonatomic) XCBConnection *connection;
-@property (strong, nonatomic) NSMutableDictionary *iconizedWindows;
+@property (strong, nonatomic) NSMutableArray *iconizedWindows;
 
+- (instancetype) init;
 - (id) initWithConnection:(XCBConnection*) aConnection;
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
-- (void) addToIconizedWindows:(XCBWindow*)aWindow andResize:(Resize)aValue;
-- (BOOL) inIconizedWindowsWithId:(xcb_window_t)winId;
-- (void) removeFromIconizedWindows:(XCBWindow*)aWindow;
+- (void) addToIconizedWindowsContainer:(XCBWindow*)aWindow;
+- (BOOL) isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow;
+- (BOOL) isFollowedByAnotherWindow:(XCBWindow *)originWindow;
 - (void) updateClientList;
-- (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize;
+- (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize;
+- (void) removeFromIconizedWindowsById:(xcb_window_t)winId;
+- (XCBWindow*) windowFromIconizedById:(xcb_window_t)winId;
+- (NSInteger) countFollowingWindowsForWindow:(XCBWindow *)aWindow;
+- (void) moveFollowingWindows:(NSInteger) followingQuantity  forWindow:(XCBWindow *) originWindow;
+- (void) moveWindow:(XCBWindow *)aWindow toPosition:(XCBPoint)aPosition;
 
 @end

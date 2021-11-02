@@ -6,3 +6,5 @@ cmake-build-debug/
 obj/
 
 CMakeLists.txt
+
+Tests/TestPuck.bundle/
