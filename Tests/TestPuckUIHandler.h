@@ -10,18 +10,19 @@
 #import "../PuckUIHandler.h"
 #import <XCBKit/XCBConnection.h>
 #import <XCBKit/XCBWindow.h>
+#import <XCBKit/XCBFrame.h>
 
 @interface TestPuckUIHandler : NSObject <UKTest>
 {
     UKTestHandler *handler;
     BOOL reportedStatus;
     XCBConnection *connection;
-    XCBWindow *findingWindow;
-    XCBWindow *fillingWindow0;
-    XCBWindow *fillingWindow1;
-    XCBWindow *fillingWindow2;
-    XCBWindow *fillingWindow3;
-    XCBWindow *fillingWindow4;
+    XCBFrame *findingWindow;
+    XCBFrame *fillingWindow0;
+    XCBFrame *fillingWindow1;
+    XCBFrame *fillingWindow2;
+    XCBFrame *fillingWindow3;
+    XCBFrame *fillingWindow4;
 }
 
 @property (strong, nonatomic) PuckUIHandler *uiHandler;
@@ -32,4 +33,6 @@
 
 - (void) testCountFollowingWindowsForWindow;
 - (void) testIsFollowedByAnotherWindow;
+- (void) testMoveFollowingWindows;
+- (void) testFnIndexOfWindow;
 @end

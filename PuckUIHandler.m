@@ -5,6 +5,8 @@
 // Created by slex on 28/05/21.
 
 #import "PuckUIHandler.h"
+#import <XCBKit/XCBFrame.h>
+#import "functions/Functions.h"
 
 
 @implementation PuckUIHandler
@@ -163,8 +165,8 @@
     if (needResize)
     {
         XCBRect rect = [iconizedWindowsContainer windowRect];
-        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y);
-        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET*2 + 3, rect.size.height);
+        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y); //TODO: CHECK If bette + OFFSET etc etc or - OFFSET etc etc
+        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width + 50 + OFFSET * 2 + 3, rect.size.height);
         [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Enlarge];
         XCBPoint repPos = XCBMakePoint([iconizedWindowsContainer windowRect].size.width - 50 - OFFSET, 0);
         [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:repPos];
@@ -174,29 +176,6 @@
     else
         [connection reparentWindow:aWindow toWindow:iconizedWindowsContainer position:XCBMakePoint(0,0)];
     
-}
-
-- (void)removeFromIconizedWindowsContainer:(XCBWindow*)aWindow
-{
-    NSLog(@"Removing window %u", [aWindow window]);
-    BOOL needResize = NO;
-    BOOL forl = NO;
-    
-    if ([iconizedWindows count] > 1)
-        needResize = YES;
-    
-    forl = [self isIconizedInFirstOrLastPosition:aWindow];
-    
-    [self removeFromIconizedWindowsById:[aWindow window]];
-    
-    if (needResize)
-    {
-        XCBRect rect = [iconizedWindowsContainer windowRect];
-        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
-        XCBSize newContainerWindowSize = XCBMakeSize(rect.size.width - 50 - OFFSET*2 - 3, rect.size.height);
-        [self resizeToPosition:newMainWindowPos andSize:newContainerWindowSize resize:Reduce];
-        [connection flush];
-    }
 }
 
 - (void)removeFromIconizedWindowsById:(xcb_window_t)winId
@@ -253,7 +232,7 @@
     return firstOrLast;
 }
 
-- (BOOL)isFollowedByAnotherWindow:(XCBWindow *)aWindow
+- (BOOL)isFollowedByAnotherWindow:(XCBWindow *)originWindow
 {
     BOOL followed = NO;
     
@@ -269,7 +248,7 @@
             XCBWindow *auxWin = [iconizedWindows objectAtIndex:i];
             XCBWindow *lastWindow = [iconizedWindows lastObject];
             
-            if ([aWindow window] == [auxWin window] && [aWindow window] != [lastWindow window])
+            if ([originWindow window] == [auxWin window] && [originWindow window] != [lastWindow window])
             {
                 XCBWindow *following = [iconizedWindows objectAtIndex:i+1];
                 
@@ -282,7 +261,7 @@
                     break;
                 }
             }
-            else if ([aWindow window] == [lastWindow window])
+            else if ([originWindow window] == [lastWindow window])
             {
                 auxWin = nil;
                 lastWindow = nil;
@@ -329,6 +308,37 @@
     lastWindow = nil;
     return following;
 }
+
+- (void) moveFollowingWindows:(NSInteger) followingQuantity forWindow:(XCBWindow *)originWindow
+{
+    NSInteger winPosition = FnIndexOfWindow(iconizedWindows, originWindow);
+    
+    for (int i = 0; i < followingQuantity; ++i)
+    {
+        winPosition++;
+        XCBWindow *moving = [iconizedWindows objectAtIndex:winPosition];
+        /*** XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y); ***/
+        XCBPoint newPosition = FnCalculateNewPosition(moving, OFFSET);
+        [self moveWindow:moving toPosition:newPosition];
+        moving = nil;
+    }
+    
+}
+
+- (void)moveWindow:(XCBWindow *)aWindow toPosition:(XCBPoint)aPosition
+{
+    int32_t values[] = {aPosition.x, aPosition.y};
+
+    xcb_configure_window([connection connection], [aWindow window], XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+
+    XCBRect newRect = XCBMakeRect(aPosition, XCBMakeSize([aWindow windowRect].size.width, [aWindow windowRect].size.height));
+    [aWindow setWindowRect:newRect];
+
+    [aWindow setOriginalRect:XCBMakeRect(XCBMakePoint(aPosition.x, aPosition.y),
+                                       XCBMakeSize([aWindow originalRect].size.width,
+                                                   [aWindow originalRect].size.height))];
+}
+
 
 - (void)updateClientList
 {

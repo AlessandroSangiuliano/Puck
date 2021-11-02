@@ -29,12 +29,13 @@
 - (void) drawDock:(CGFloat)width andHeigth:(CGFloat)height;
 - (void) addToIconizedWindowsContainer:(XCBWindow*)aWindow;
 - (BOOL) isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow;
-- (BOOL) isFollowedByAnotherWindow:(XCBWindow *)aWindow;
-- (void) removeFromIconizedWindowsContainer:(XCBWindow*)aWindow;
+- (BOOL) isFollowedByAnotherWindow:(XCBWindow *)originWindow;
 - (void) updateClientList;
 - (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize;
 - (void) removeFromIconizedWindowsById:(xcb_window_t)winId;
 - (XCBWindow*) windowFromIconizedById:(xcb_window_t)winId;
 - (NSInteger) countFollowingWindowsForWindow:(XCBWindow *)aWindow;
+- (void) moveFollowingWindows:(NSInteger) followingQuantity  forWindow:(XCBWindow *) originWindow;
+- (void) moveWindow:(XCBWindow *)aWindow toPosition:(XCBPoint)aPosition;
 
 @end

@@ -18,12 +18,14 @@ $(TOOL_NAME)_OBJC_FILES = \
 		PuckRunLoop.m \
 		PuckEventHandlerFactory.m \
 		utils/PuckUtils.m \
+		functions/Functions.m \
 
 $(TOOL_NAME)_HEADER_FILES = \
 		PuckUIHandler.h \
 		PuckRunLoop.h \
 		PuckEventHandlerFactory.h \
 		utils/PuckUtils.h \
+		functions/Functions.h \
 
 $(TOOL_NAME)_TOOL_LIBS = -lXCBKit -lxcb
 

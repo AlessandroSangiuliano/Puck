@@ -13,11 +13,13 @@ $(BUNDLE_NAME)_NEEDS_GUI = no
 
 $(BUNDLE_NAME)_OBJC_FILES = $(wildcard *.m) \
 	$(filter-out ../main.m, $(wildcard ../*.m)) \
-	$(wildcard ../utils/*.m)
+	$(wildcard ../utils/*.m) \
+	$(wildcard ../functions/*.m)
 
 $(BUNDLE_NAME)_HEADER_FILES = $(wildcard *.h) \
 	$(wildcard ../*.h) \
-	$(wildcard ../utils/*.h)
+	$(wildcard ../utils/*.h) \
+	$(wildcard ../functions/*.h)
 
 $(BUNDLE_NAME)_TOOL_LIBS = -lxcb -lXCBKit #-lPuck #-lXCBKit
 
