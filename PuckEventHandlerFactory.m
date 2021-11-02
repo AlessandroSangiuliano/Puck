@@ -136,6 +136,22 @@
                     needResize = NO;
                 }
                 
+                /*** if not forl, is followed and need resize then the window is in the middle; resize the dockbar and move the followers ***/
+                
+                if (!forl && needResize && [uiHandler isFollowedByAnotherWindow:frame])
+                {
+                    [uiHandler moveFollowingWindows:followingWinsCount forWindow:frame];
+                    [uiHandler removeFromIconizedWindowsById:[frame window]];
+                    
+                    /*** resize the dock ***/
+                    
+                    XCBRect iconizedContainerRect = [iconizedContainerWindow windowRect];
+                    XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
+                    XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
+                    [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
+                    [connection flush];
+                }
+                
                 dockWindow = nil;
                 iconizedContainerWindow = nil;
                 break;
