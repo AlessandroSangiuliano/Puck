@@ -19,6 +19,7 @@
 
 @property (strong, nonatomic) XCBWindow *dockWindow;
 @property (strong, nonatomic) XCBWindow *iconizedWindowsContainer;
+@property (strong, nonatomic) XCBWindow *separatorWindow;
 @property (nonatomic, assign) xcb_window_t *clientList;
 @property (strong, nonatomic) PuckUtils *puckUtils;
 @property (strong, nonatomic) XCBConnection *connection;
