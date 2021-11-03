@@ -69,10 +69,16 @@
                                          forWindow:rootWindow
                                             delete:NO
                                             length:UINT32_MAX];
-
-    xcb_window_t *list = xcb_get_property_value(reply);
     
-    clientListSize = xcb_get_property_value_length(reply) / 4;
+    if (reply)
+        clientListSize = xcb_get_property_value_length(reply) / 4; // 4 are the bytes for an int...
+    
+    xcb_window_t *list = (xcb_window_t*) malloc(clientListSize * sizeof(xcb_window_t));
+    xcb_window_t *aux = xcb_get_property_value(reply);
+    
+    for (int i = 0; i < clientListSize; ++i)
+        list[i] = aux[i];
+    
     [connection flush];
     
     rootWindow = nil;
