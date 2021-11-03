@@ -12,6 +12,7 @@
 @implementation PuckUIHandler
 
 @synthesize dockWindow;
+@synthesize separatorWindow;
 @synthesize clientList;
 @synthesize puckUtils;
 @synthesize connection;
@@ -96,6 +97,8 @@
     [ewmhService updateNetWmState:dockWindow];
 
     /*** Request for the iconized windows container ***/
+    
+    response = nil;
 
     [request setParentWindow:dockWindow];
     [request setXPosition:width - 58];
@@ -110,11 +113,25 @@
 
     iconizedWindowsContainer = [response window];
     
-    [dockWindow description];
-    [iconizedWindowsContainer description];
-
+    /*** Request for separator window ***/
+    
+    response = nil;
+    
+    [request setParentWindow:dockWindow];
+    [request setXPosition:width - 62];
+    [request setYPosition:height - 58];
+    [request setWidth:2];
+    [request setHeight:56];
+    
+    values[0] = [screen screen]->black_pixel;
+    values[1] = FRAMEMASK;
+    
+    response = [connection createWindowForRequest:request registerWindow:NO];
+    separatorWindow = [response window];
+    
     [connection mapWindow:dockWindow];
     [connection mapWindow:iconizedWindowsContainer];
+    [connection mapWindow:separatorWindow];
     [connection flush];
 
     screen = nil;
@@ -365,6 +382,7 @@
     iconizedWindowsContainer = nil;
     iconizedWindows = nil;
     puckUtils = nil;
+    separatorWindow = nil;
 
     if (clientList)
         free(clientList); // is pure C, but inside there are unsigned int values
