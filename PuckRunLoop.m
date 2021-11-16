@@ -40,6 +40,8 @@
             {
                 xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
                 NSLog(@"Window %u mapped", mapNotify->window);
+                [eventHandler handleMapNotify:mapNotify];
+                [connection flush];
                 break;
             }
             case XCB_PROPERTY_NOTIFY:

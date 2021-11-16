@@ -7,6 +7,7 @@
 #import "PuckEventHandlerFactory.h"
 #import <XCBKit/services/ICCCMService.h>
 #import <XCBKit/XCBFrame.h>
+#import <XCBKit/utils/CairoSurfacesSet.h>
 
 @implementation PuckEventHandlerFactory
 
@@ -37,7 +38,7 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
     {
-        NSLog(@"ClientList");
+        //NSLog(@"ClientList");
         [uiHandler updateClientList];
         
         NSArray *windows = [[connection windowsMap] allValues];
@@ -47,7 +48,7 @@
         for (int i = 0; i < [windows count]; ++i)
         {
             XCBWindow *win = [windows objectAtIndex:i];
-            NSLog(@"Add listener for dockWindow %u", [win window]);
+            //NSLog(@"Add listener for dockWindow %u", [win window]);
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
             win = nil;
         }
@@ -56,7 +57,7 @@
     }
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientListStacking]] == anEvent->atom)
-        NSLog(@"ClientListStacking");
+        //NSLog(@"ClientListStacking");
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHWMStateHidden]] == anEvent->atom)
         NSLog(@"Hidden");
@@ -66,7 +67,7 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[icccmService WMState]] == anEvent->atom)
     {
-        NSLog(@"WM STATE for dockWindow %u", anEvent->window);
+        //NSLog(@"WM STATE for dockWindow %u", anEvent->window);
         WindowState wmState = -1;
 
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
@@ -174,6 +175,71 @@
     atomService = nil;
     ewmhService = nil;
     icccmService = nil;
+}
+
+- (void) handleMapNotify:(xcb_map_notify_event_t*) mapNotifyEvent
+{
+    XCBFrame *frame;
+    XCBWindow *window = [connection windowForXCBId:mapNotifyEvent->window];
+    EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    ICCCMService *icccmService = [ICCCMService sharedInstanceWithConnection:connection];
+    
+    [window onScreen];
+    [window updateAttributes];
+    
+    NSLog(@"Leader window: %@", [window leaderWindow]);
+    
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        frame = (XCBFrame *)window;
+        window = [frame childWindowForKey:ClientWindow];
+    }
+    
+    if (window != nil && [window icons] == nil)
+    {
+        /*** this is moslty for GNUstep icons ***/
+        
+        void *motifHints = [ewmhService getProperty:[ewmhService MotifWMHints]
+                            propertyType:XCB_GET_PROPERTY_TYPE_ANY
+                                          forWindow:window
+                                             delete:NO
+                                             length:5 * sizeof(uint64_t)];
+        
+        if (motifHints)
+        {
+            xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(motifHints); //to be released?
+            
+            if (atom[0] == 3 /*&& atom[1] == 0 && atom[2] == 0 && atom[3] == 0 && atom[4] == 0*/)
+            {
+                free(motifHints);
+                [window generateWindowIcons];
+                [window onScreen];
+                [window updateAttributes];
+                [icccmService wmClassForWindow:window];
+            }
+        }
+        else
+        {
+            [window generateWindowIcons];
+            [icccmService wmClassForWindow:window];
+        }
+        
+        /*if ([[window icons] count] != 0)
+        {
+            NSLog(@"COunt: %ld", [[window icons] count]);
+            NSLog(@"Adescio: %@ %@", [[window windowClass] objectAtIndex:0], [[window windowClass] objectAtIndex:1]);
+        }*/
+        
+        [window updateLeaderWindow];
+        NSLog(@"Giggio %u", [[window leaderWindow] window]);
+        
+        [window drawIcons];
+        
+        frame = nil;
+        window = nil;
+        ewmhService = nil;
+        icccmService = nil;
+    }
 }
 
 - (void)dealloc
