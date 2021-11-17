@@ -18,7 +18,7 @@ int main(int argc, const char * argv[])
         // insert code here...
         NSLog(@"Starting Puck Dock...");
 
-        XCBConnection *connection = [[XCBConnection alloc] initAsWindowManager:NO];
+        XCBConnection *connection = [XCBConnection sharedConnectionAsWindowManager:NO];
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithConnection:connection];
         PuckRunLoop *puckRunLoop = [[PuckRunLoop alloc] initWithUIHandler:uiHandler];
         [uiHandler drawDock:200 andHeigth:60];

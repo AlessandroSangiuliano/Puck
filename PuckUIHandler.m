@@ -47,7 +47,7 @@
     connection = aConnection;
     puckUtils = [[PuckUtils alloc] initWhitConnection:connection];
 
-    clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
+    clientList = [connection clientList]; /** we have clientList in the connection too. it could be reused **/
 
     iconizedWindows = [[NSMutableArray alloc] init];
 
@@ -361,8 +361,8 @@
 {
     /*** TODO: CHECK IF THIS LEAKING ***/
     
-    if (clientList)
-        free(clientList);
+    /*if (clientList)
+        free(clientList);*/
 
     clientList = [puckUtils queryForNetClientList];
     [[connection windowsMap]  removeAllObjects];
@@ -383,9 +383,11 @@
     iconizedWindows = nil;
     puckUtils = nil;
     separatorWindow = nil;
+    
+    clientList = NULL;
 
-    if (clientList)
-        free(clientList); // is pure C, but inside there are unsigned int values
+    /*if (clientList)
+        free(clientList);*/ // is pure C, but inside there are unsigned int values
 }
 
 @end
