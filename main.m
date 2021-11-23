@@ -26,7 +26,7 @@ int main(int argc, const char * argv[])
         int size = [[uiHandler puckUtils] clientListSize];
         
         NSArray *windows = [[connection windowsMap] allValues];
-
+        
         for (int i = 0; i < size; ++i)
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
         
