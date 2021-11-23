@@ -46,15 +46,16 @@
 
     connection = aConnection;
     puckUtils = [[PuckUtils alloc] initWhitConnection:connection];
+    NSLog(@"Pene");
 
-    clientList = [connection clientList]; /** we have clientList in the connection too. it could be reused **/
+    clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
     iconizedWindows = [[NSMutableArray alloc] init];
 
-    int size = [puckUtils clientListSize];
+    /*int size = [puckUtils clientListSize];
 
     for (int i = 0; i < size; ++i)
-        [puckUtils encapsulateWindow:clientList[i]];
+        [puckUtils encapsulateWindow:clientList[i]];*/
 
     return self;
 }
@@ -133,7 +134,7 @@
     [connection mapWindow:iconizedWindowsContainer];
     [connection mapWindow:separatorWindow];
     [connection flush];
-
+    
     screen = nil;
     request = nil;
     response = nil;
@@ -361,17 +362,19 @@
 {
     /*** TODO: CHECK IF THIS LEAKING ***/
     
-    /*if (clientList)
-        free(clientList);*/
+    
+    if (clientList)
+        free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
-    [[connection windowsMap]  removeAllObjects];
+    
+    //[[connection windowsMap]  removeAllObjects];
 
-    int size = [puckUtils clientListSize];
+    /*int size = [puckUtils clientListSize];
     
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
-            [puckUtils encapsulateWindow:clientList[i]];
+            [puckUtils encapsulateWindow:clientList[i]];*/
         
 }
 
@@ -384,10 +387,9 @@
     puckUtils = nil;
     separatorWindow = nil;
     
-    clientList = NULL;
 
-    /*if (clientList)
-        free(clientList);*/ // is pure C, but inside there are unsigned int values
+    if (clientList)
+        free(clientList); // is pure C, but inside there are unsigned int values
 }
 
 @end

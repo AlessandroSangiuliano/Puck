@@ -24,6 +24,7 @@
 
     connection = aConnection;
     ewmhService = [EWMHService sharedInstanceWithConnection:connection];
+    NSLog(@"Pene");
 
     return self;
 }
@@ -55,7 +56,7 @@
     
     rootWindow = nil;
     free(reply);
-
+    
     return list;
 }
 

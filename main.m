@@ -24,11 +24,12 @@ int main(int argc, const char * argv[])
         [uiHandler drawDock:200 andHeigth:60];
 
         int size = [[uiHandler puckUtils] clientListSize];
-
+        
         NSArray *windows = [[connection windowsMap] allValues];
 
         for (int i = 0; i < size; ++i)
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
+        
 
         windows = nil;
 

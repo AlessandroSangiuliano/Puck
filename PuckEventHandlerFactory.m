@@ -38,7 +38,7 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
     {
-        //NSLog(@"ClientList");
+        NSLog(@"ClientList");
         [uiHandler updateClientList];
         
         NSArray *windows = [[connection windowsMap] allValues];

@@ -8,3 +8,9 @@ obj/
 CMakeLists.txt
 
 Tests/TestPuck.bundle/
+
+CMakeCache.txt
+
+CMakeFiles/3.21.4/
+
+CMakeFiles/
