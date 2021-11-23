@@ -24,7 +24,6 @@
 
     connection = aConnection;
     ewmhService = [EWMHService sharedInstanceWithConnection:connection];
-    NSLog(@"Pene");
 
     return self;
 }

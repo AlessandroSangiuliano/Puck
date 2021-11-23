@@ -46,7 +46,6 @@
 
     connection = aConnection;
     puckUtils = [[PuckUtils alloc] initWhitConnection:connection];
-    NSLog(@"Pene");
 
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
