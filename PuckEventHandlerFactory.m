@@ -38,7 +38,7 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
     {
-        //NSLog(@"ClientList");
+        NSLog(@"ClientList");
         [uiHandler updateClientList];
         
         NSArray *windows = [[connection windowsMap] allValues];
@@ -47,10 +47,10 @@
 
         for (int i = 0; i < [windows count]; ++i)
         {
-            XCBWindow *win = [windows objectAtIndex:i];
+            //XCBWindow *win = [windows objectAtIndex:i];
             //NSLog(@"Add listener for dockWindow %u", [win window]);
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
-            win = nil;
+            //win = nil;
         }
 
         windows = nil;

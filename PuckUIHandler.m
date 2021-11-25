@@ -51,10 +51,10 @@
 
     iconizedWindows = [[NSMutableArray alloc] init];
 
-    int size = [puckUtils clientListSize];
+    /*int size = [puckUtils clientListSize];
 
     for (int i = 0; i < size; ++i)
-        [puckUtils encapsulateWindow:clientList[i]];
+        [puckUtils encapsulateWindow:clientList[i]];*/
 
     return self;
 }
@@ -133,7 +133,7 @@
     [connection mapWindow:iconizedWindowsContainer];
     [connection mapWindow:separatorWindow];
     [connection flush];
-
+    
     screen = nil;
     request = nil;
     response = nil;
@@ -361,17 +361,19 @@
 {
     /*** TODO: CHECK IF THIS LEAKING ***/
     
+    
     if (clientList)
         free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
-    [[connection windowsMap]  removeAllObjects];
+    
+    //[[connection windowsMap]  removeAllObjects];
 
-    int size = [puckUtils clientListSize];
+    /*int size = [puckUtils clientListSize];
     
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
-            [puckUtils encapsulateWindow:clientList[i]];
+            [puckUtils encapsulateWindow:clientList[i]];*/
         
 }
 
@@ -383,6 +385,7 @@
     iconizedWindows = nil;
     puckUtils = nil;
     separatorWindow = nil;
+    
 
     if (clientList)
         free(clientList); // is pure C, but inside there are unsigned int values

@@ -55,7 +55,7 @@
     
     rootWindow = nil;
     free(reply);
-
+    
     return list;
 }
 
