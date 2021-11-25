@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
 #import "PuckRunLoop.h"
-
+#import "PuckServer.h"
 
 int main(int argc, const char * argv[])
 {
@@ -22,13 +22,16 @@ int main(int argc, const char * argv[])
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithConnection:connection];
         PuckRunLoop *puckRunLoop = [[PuckRunLoop alloc] initWithUIHandler:uiHandler];
         [uiHandler drawDock:200 andHeigth:60];
-
+        
+        PuckServer *puckServer = [[PuckServer alloc] initWithName:@"PuckServer"];
+        
         int size = [[uiHandler puckUtils] clientListSize];
-
+        
         NSArray *windows = [[connection windowsMap] allValues];
-
-        for (int i = 0; i < size; ++i)
-            [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
+        
+        /*for (int i = 0; i < size; ++i)
+            [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];*/
+        
 
         windows = nil;
 
