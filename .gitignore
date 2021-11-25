@@ -14,3 +14,9 @@ CMakeCache.txt
 CMakeFiles/3.21.4/
 
 CMakeFiles/
+
+Makefile
+
+*.cmake
+
+Puck.cbp
