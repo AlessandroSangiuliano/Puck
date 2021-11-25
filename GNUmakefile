@@ -17,12 +17,16 @@ $(TOOL_NAME)_OBJC_FILES = \
 		PuckUIHandler.m \
 		PuckRunLoop.m \
 		PuckEventHandlerFactory.m \
+		PuckClient.m \
+		PuckServer.m \
 		utils/PuckUtils.m \
 		functions/Functions.m \
 
 $(TOOL_NAME)_HEADER_FILES = \
 		PuckUIHandler.h \
 		PuckRunLoop.h \
+		PuckClient.h \
+        PuckServer.h \
 		PuckEventHandlerFactory.h \
 		utils/PuckUtils.h \
 		functions/Functions.h \
