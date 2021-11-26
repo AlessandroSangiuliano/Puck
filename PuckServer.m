@@ -43,6 +43,11 @@
     connection = nil;
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"%@ server name: %@", [PuckServer className], serverName];
+}
+
 - (void) dealloc
 {
     serverName = nil;

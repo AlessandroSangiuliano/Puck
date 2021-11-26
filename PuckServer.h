@@ -18,4 +18,6 @@
 
 - (void) handleNotification:(NSNotification *)aNotification;
 
+- (NSString *) description;
+
 @end
