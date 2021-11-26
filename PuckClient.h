@@ -8,10 +8,14 @@
 #import <Foundation/Foundation.h>
 #import <XCBKit/protocols/client/Client.h>
 
+@class XCBConnection;
+
 @interface PuckClient : NSObject <Client>
 {
 }
 
-- (instancetype) init;
+@property (strong, nonatomic)  XCBConnection *connection;
+
+- (instancetype) initWithConnection:(XCBConnection *)aConnection;
 
 @end
