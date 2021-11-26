@@ -36,7 +36,11 @@
     NSLog(@"Received: %@", [aNotification name]);
     
     id <Server> server = (id <Server>) [NSConnection rootProxyForConnectionWithRegisteredName:@"UrosWMServer" host:@""];
-    NSLog(@"Relle: %@", [server handleRequestFor:WindowsMapRequest]);
+    XCBConnection *connection = [XCBConnection sharedConnectionAsWindowManager:NO];
+    [connection setWindowsMap:[server handleRequestFor:WindowsMapRequest]];
+    
+    server = nil;
+    connection = nil;
 }
 
 - (void) dealloc

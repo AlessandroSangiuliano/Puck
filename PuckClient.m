@@ -5,10 +5,13 @@
 // Created by slex on 24/11/21.
 
 #import "PuckClient.h"
+#import <XCBKit/XCBConnection.h>
 
 @implementation PuckClient
 
-- (instancetype) init
+@synthesize connection;
+
+- (instancetype)initWithConnection:(XCBConnection *)aConnection
 {
     self = [super init];
     
@@ -18,12 +21,14 @@
         return nil;
     }
     
+    connection = aConnection;
+    
     return self;
 }
 
 - (void) dealloc
 {
-
+    connection = nil;
 }
 
 @end
