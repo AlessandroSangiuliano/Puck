@@ -20,4 +20,6 @@
 
 - (NSString *) description;
 
+- (void) becomeServer;
+
 @end

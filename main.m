@@ -25,15 +25,18 @@ int main(int argc, const char * argv[])
         
         PuckServer *puckServer = [[PuckServer alloc] initWithName:@"PuckServer"];
         
+        [NSThread detachNewThreadSelector:@selector(becomeServer) toTarget:puckServer withObject:nil];
         int size = [[uiHandler puckUtils] clientListSize];
         
-        NSArray *windows = [[connection windowsMap] allValues];
+        /*** aggiungo il listener per ogni finestre della client list presente anche nella windows map. ***/
+        
+        //NSArray *windows = [[connection windowsMap] allValues];
         
         /*for (int i = 0; i < size; ++i)
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];*/
         
 
-        windows = nil;
+        //windows = nil;
 
         [puckRunLoop startEventHandlerLoop];
 }
