@@ -21,13 +21,7 @@
         return nil;
     }
     
-    [[NSDistributedNotificationCenter defaultCenter] addObserver:self
-                                                        selector:@selector(handleNotification:)
-                                                            name:WINDOWSMAPUPDATED
-                                                          object:nil];
-    
     serverName = aServerName;
-    [[NSRunLoop mainRunLoop] run];
     return self;
 }
 
@@ -42,6 +36,16 @@
     server = nil;
     connection = nil;
 }
+
+- (void)becomeServer
+{
+    [[NSDistributedNotificationCenter defaultCenter] addObserver:self
+                                                        selector:@selector(handleNotification:)
+                                                            name:WINDOWSMAPUPDATED
+                                                          object:nil];
+    
+    [[NSRunLoop currentRunLoop] run];
+} 
 
 - (NSString *)description
 {
