@@ -353,15 +353,17 @@
     /*NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
     [runLoop configureAsServer];
     [runLoop run];*/
+    //[[NSRunLoop currentRunLoop] run];
 }
 
 - (void)handleNotification:(NSNotification *)aNotification
 {
-    /*@synchronized (self)
-    {*/
+    NSLog(@"Vaggeggia");
+    @synchronized (self)
+    {
         [self updateClientList];
         [self addListeners];
-    //}
+    }
     
     //[[NSRunLoop currentRunLoop] run];
 }
@@ -372,7 +374,9 @@
     
     for (int i = 0; i <size ; ++i)
     {
+        NSLog(@"%@", [[connection windowsMap] description]);
         XCBWindow *window = [connection windowForXCBId:clientList[i]];
+        NSLog(@"Adding %u", [window window]);
         [puckUtils addListenerForWindow:window withMask:DOCKMASK];
         window = nil;
     }

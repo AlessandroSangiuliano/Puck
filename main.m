@@ -24,22 +24,27 @@ int main(int argc, const char * argv[])
     
         [uiHandler drawDock:200 andHeigth:60];
     
-        //[NSThread detachNewThreadSelector:@selector(startEventHandlerLoop) toTarget:puckRunLoop withObject:nil];
+        //[NSThread detachNewThreadSelector:@selector(startEventHandlerLoop) toTarget:puckRunLoop withObject:nil]; working in the main thread
         
-        //[uiHandler addObserver];
+        [uiHandler addObserver];
     
         //[NSThread detachNewThreadSelector:@selector(addObserver) toTarget:uiHandler withObject:nil];
     
-        PuckServer *puckServer = [[[PuckServer alloc] initWithName:@"PuckServer"] detachServerInAnotherThread];
-        
-        //[puckServer becomeServer];
+        //PuckServer *puckServer = [[[PuckServer alloc] initWithName:@"PuckServer"] detachServerInAnotherThread];
+
+        PuckServer *puckServer = [[PuckServer alloc] initWithName:@"PuckServer"];
+        //[puckServer setConnection:connection];
+        /*[puckServer setupThreadingSupport]; working in the main thread
+        [puckServer becomeServer];*/
         //PuckServer *thr = (PuckServer *) [puckServer detachThread];
+
+        [NSThread detachNewThreadSelector:@selector(detachServerInAnotherThreadWithConnection:) toTarget:puckServer withObject:connection];
         
-        [puckServer addObserver];
+        //[puckServer addObserver];
     
         NSLog(@"Ciccio %@", [puckServer description]);
         
-        
+        //[[NSRunLoop currentRunLoop] run];
     
         //[NSThread detachNewThreadSelector:@selector(becomeServer) toTarget:puckServer withObject:nil];
         /*NSThread *serverThread = [[NSThread alloc] initWithTarget:puckServer selector:@selector(becomeServer) object:nil];

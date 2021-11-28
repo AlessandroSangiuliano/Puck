@@ -32,6 +32,7 @@
     XCBConnection *connection = [uiHandler connection];
     PuckEventHandlerFactory *eventHandler = [[PuckEventHandlerFactory alloc] initWithConnection:connection andUiHandler:uiHandler];
 
+    NSLog(@"Starting run loop");
     while ((e = xcb_wait_for_event([connection connection])))
     {
         switch (e->response_type & ~0x80)
