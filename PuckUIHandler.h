@@ -38,5 +38,8 @@
 - (NSInteger) countFollowingWindowsForWindow:(XCBWindow *)aWindow;
 - (void) moveFollowingWindows:(NSInteger) followingQuantity  forWindow:(XCBWindow *) originWindow;
 - (void) moveWindow:(XCBWindow *)aWindow toPosition:(XCBPoint)aPosition;
+- (void) handleNotification:(NSNotification *) aNotification;
+- (void) addListeners;
+- (void) addObserver;
 
 @end

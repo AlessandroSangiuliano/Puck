@@ -30,6 +30,8 @@ $(TOOL_NAME)_HEADER_FILES = \
 		PuckEventHandlerFactory.h \
 		utils/PuckUtils.h \
 		functions/Functions.h \
+		enums/EResize.h \
+		defines/NotificationDefines.h
 
 $(TOOL_NAME)_TOOL_LIBS = -lXCBKit -lxcb
 

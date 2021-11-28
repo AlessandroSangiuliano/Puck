@@ -13,13 +13,14 @@
 }
 
 @property (nonatomic, strong) NSString *serverName;
+@property (nonatomic, strong) NSDistributedNotificationCenter *defaultCenter;
+@property (nonatomic, strong) NSConnection *conn;
 
 - (instancetype) initWithName:(NSString *)aServerName;
-
 - (void) handleNotification:(NSNotification *)aNotification;
-
 - (NSString *) description;
-
 - (void) becomeServer;
+- (void) addObserver;
+- (id) detachServerInAnotherThread;
 
 @end

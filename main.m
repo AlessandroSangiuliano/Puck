@@ -21,25 +21,32 @@ int main(int argc, const char * argv[])
         XCBConnection *connection = [XCBConnection sharedConnectionAsWindowManager:NO];
         PuckUIHandler *uiHandler = [[PuckUIHandler alloc] initWithConnection:connection];
         PuckRunLoop *puckRunLoop = [[PuckRunLoop alloc] initWithUIHandler:uiHandler];
+    
         [uiHandler drawDock:200 andHeigth:60];
+    
+        //[NSThread detachNewThreadSelector:@selector(startEventHandlerLoop) toTarget:puckRunLoop withObject:nil];
         
-        PuckServer *puckServer = [[PuckServer alloc] initWithName:@"PuckServer"];
+        //[uiHandler addObserver];
+    
+        //[NSThread detachNewThreadSelector:@selector(addObserver) toTarget:uiHandler withObject:nil];
+    
+        PuckServer *puckServer = [[[PuckServer alloc] initWithName:@"PuckServer"] detachServerInAnotherThread];
         
-        [NSThread detachNewThreadSelector:@selector(becomeServer) toTarget:puckServer withObject:nil];
-        int size = [[uiHandler puckUtils] clientListSize];
+        //[puckServer becomeServer];
+        //PuckServer *thr = (PuckServer *) [puckServer detachThread];
         
-        /*** aggiungo il listener per ogni finestre della client list presente anche nella windows map. ***/
+        [puckServer addObserver];
+    
+        NSLog(@"Ciccio %@", [puckServer description]);
         
-        //NSArray *windows = [[connection windowsMap] allValues];
         
-        /*for (int i = 0; i < size; ++i)
-            [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];*/
+    
+        //[NSThread detachNewThreadSelector:@selector(becomeServer) toTarget:puckServer withObject:nil];
+        /*NSThread *serverThread = [[NSThread alloc] initWithTarget:puckServer selector:@selector(becomeServer) object:nil];
+        [serverThread start];*/
         
-
-        //windows = nil;
-
         [puckRunLoop startEventHandlerLoop];
-}
+    }
 
     return 0;
 }

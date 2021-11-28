@@ -7,6 +7,7 @@
 #import "PuckUIHandler.h"
 #import <XCBKit/XCBFrame.h>
 #import "functions/Functions.h"
+#import "defines/NotificationDefines.h"
 
 
 @implementation PuckUIHandler
@@ -21,17 +22,7 @@
 
 - (instancetype)init
 {
-    self = [super init];
-
-    if (self == nil)
-    {
-        NSLog(@"Unable to init...");
-        return nil;
-    }
-    
-    iconizedWindows = [[NSMutableArray alloc] init];
-    
-    return self;
+    return [self initWithConnection:nil];
 }
 
 - (id)initWithConnection:(XCBConnection*)aConnection
@@ -356,25 +347,45 @@
                                                    [aWindow originalRect].size.height))];
 }
 
+- (void)addObserver
+{
+    [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:INTERNAL_WINDOWS_MAP_UPDATED object:nil];
+    /*NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+    [runLoop configureAsServer];
+    [runLoop run];*/
+}
+
+- (void)handleNotification:(NSNotification *)aNotification
+{
+    /*@synchronized (self)
+    {*/
+        [self updateClientList];
+        [self addListeners];
+    //}
+    
+    //[[NSRunLoop currentRunLoop] run];
+}
+
+- (void)addListeners
+{
+    int size = [puckUtils clientListSize];
+    
+    for (int i = 0; i <size ; ++i)
+    {
+        XCBWindow *window = [connection windowForXCBId:clientList[i]];
+        [puckUtils addListenerForWindow:window withMask:DOCKMASK];
+        window = nil;
+    }
+}
 
 - (void)updateClientList
 {
     /*** TODO: CHECK IF THIS LEAKING ***/
     
-    
     if (clientList)
         free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
-    
-    //[[connection windowsMap]  removeAllObjects];
-
-    /*int size = [puckUtils clientListSize];
-    
-    for (int i = 0; i < size; ++i)
-        if (clientList[i] != 0)
-            [puckUtils encapsulateWindow:clientList[i]];*/
-        
 }
 
 - (void)dealloc
