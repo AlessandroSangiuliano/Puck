@@ -65,7 +65,7 @@
         //[defaultCenter postNotification:notification];
         
         notification = nil;
-    //*}
+    }*/
     
     server = nil;
     connection = nil;
