@@ -371,19 +371,19 @@
 - (void)addListeners
 {
     int size = [puckUtils clientListSize];
-
-    NSMutableDictionary *winddowsMap = [connection windowsMap];
+    
+    NSMutableDictionary *windowsMap = [connection windowsMap];
     
     for (int i = 0; i <size ; ++i)
     {
-        NSLog(@"%@", [winddowsMap description]);
+        NSLog(@"%@", [windowsMap description]);
         XCBWindow *window = [connection windowForXCBId:clientList[i]];
         NSLog(@"Adding %u", [window window]);
         [puckUtils addListenerForWindow:window withMask:DOCKMASK];
         window = nil;
     }
 
-    winddowsMap = nil;
+    windowsMap = nil;
 }
 
 - (void)updateClientList
