@@ -349,7 +349,7 @@
 
 - (void)addObserver
 {
-    [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:INTERNAL_WINDOWS_MAP_UPDATED object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:INTERNAL_WINDOWS_MAP_UPDATED object:nil];
     /*NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
     [runLoop configureAsServer];
     [runLoop run];*/
@@ -358,21 +358,29 @@
 
 - (void)handleNotification:(NSNotification *)aNotification
 {
-    NSLog(@"Vaggeggia");
+    NSDictionary *windowsMap = [aNotification userInfo];
+    NSLog(@"Vaggeggia %@", windowsMap);
+    
     @synchronized (self)
     {
         [self updateClientList];
-        [self addListeners];
+        [self addListenersForWindows:windowsMap];
     }
     
     //[[NSRunLoop currentRunLoop] run];
+    
+    windowsMap = nil;
 }
 
-- (void)addListeners
+- (void)addListenersForWindows:(NSDictionary *)windows
 {
     int size = [puckUtils clientListSize];
+    NSMutableDictionary *windowsMap = [windows mutableCopy];
     
-    NSMutableDictionary *windowsMap = [connection windowsMap];
+    [connection setWindowsMap:nil];
+    [connection setWindowsMap:windowsMap];
+    
+    NSLog(@"count in listeners: %lu", [windowsMap count]);
     
     for (int i = 0; i <size ; ++i)
     {
@@ -384,6 +392,7 @@
     }
 
     windowsMap = nil;
+    NSLog(@"END!!");
 }
 
 - (void)updateClientList

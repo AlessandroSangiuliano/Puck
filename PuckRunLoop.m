@@ -31,8 +31,9 @@
     xcb_generic_event_t *e;
     XCBConnection *connection = [uiHandler connection];
     PuckEventHandlerFactory *eventHandler = [[PuckEventHandlerFactory alloc] initWithConnection:connection andUiHandler:uiHandler];
-
-    NSLog(@"Starting run loop");
+    
+    NSLog(@"GNOGNÌ");
+    
     while ((e = xcb_wait_for_event([connection connection])))
     {
         switch (e->response_type & ~0x80)
@@ -47,6 +48,9 @@
             }
             case XCB_PROPERTY_NOTIFY:
             {
+                NSLog(@"Count in handler: %lu", [[connection windowsMap] count]);
+                if ([[connection windowsMap] count] == 0)
+                    continue;
                 xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
                 [eventHandler handlePropertyNotify:propEvent];
                 [connection flush];
