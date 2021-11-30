@@ -32,42 +32,49 @@
     XCBConnection *connection = [uiHandler connection];
     PuckEventHandlerFactory *eventHandler = [[PuckEventHandlerFactory alloc] initWithConnection:connection andUiHandler:uiHandler];
     
-    NSLog(@"GNOGNÌ");
-    
     while ((e = xcb_wait_for_event([connection connection])))
     {
-        switch (e->response_type & ~0x80)
+        if ([uiHandler semaphore])
         {
-            case XCB_MAP_NOTIFY:
+            switch (e->response_type & ~0x80)
             {
-                xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
-                NSLog(@"Window %u mapped", mapNotify->window);
-                [eventHandler handleMapNotify:mapNotify];
-                [connection flush];
-                break;
-            }
-            case XCB_PROPERTY_NOTIFY:
-            {
-                NSLog(@"Count in handler: %lu", [[connection windowsMap] count]);
-                if ([[connection windowsMap] count] == 0)
-                    continue;
-                xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
-                [eventHandler handlePropertyNotify:propEvent];
-                [connection flush];
-                break;
-            }
-            case XCB_MOTION_NOTIFY:
-            {
-                break;
-            }
-            default:
-            {
-                //NSLog(@"Default");
-                break;
+                case XCB_MAP_NOTIFY:
+                {
+                    [uiHandler semaphore];
+                    [uiHandler setupServer];
+                    xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t *) e;
+                    NSLog(@"Window %u mapped", mapNotify->window);
+                    [eventHandler handleMapNotify:mapNotify];
+                    [connection flush];
+                    [uiHandler setSemaphore:NO];
+                    break;
+                }
+                case XCB_PROPERTY_NOTIFY:
+                {
+                    NSLog(@"Count in handler: %lu", [[connection windowsMap] count]);
+                    if ([[connection windowsMap] count] == 0)
+                        continue;
+                    xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;
+                    [eventHandler handlePropertyNotify:propEvent];
+                    [connection flush];
+                    [uiHandler setSemaphore:NO];
+                    break;
+                }
+                case XCB_MOTION_NOTIFY:
+                {
+                    break;
+                }
+                default:
+                {
+                    //NSLog(@"Default");
+                    break;
+                }
             }
         }
+        else
+            NSLog(@"NOOOOO");
     }
-
+    
     eventHandler = nil;
     connection = nil;
 }

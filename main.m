@@ -23,6 +23,7 @@ int main(int argc, const char * argv[])
         PuckRunLoop *puckRunLoop = [[PuckRunLoop alloc] initWithUIHandler:uiHandler];
     
         [uiHandler drawDock:200 andHeigth:60];
+        //[uiHandler setupServer];
     
         //[NSThread detachNewThreadSelector:@selector(startEventHandlerLoop) toTarget:puckRunLoop withObject:nil]; working in the main thread
         
@@ -33,6 +34,7 @@ int main(int argc, const char * argv[])
         //PuckServer *puckServer = [[[PuckServer alloc] initWithName:@"PuckServer"] detachServerInAnotherThread];
 
         PuckServer *puckServer = [[PuckServer alloc] initWithName:@"PuckServer"];
+        
         //[puckServer setConnection:connection];
         /*[puckServer setupThreadingSupport]; working in the main thread
         [puckServer becomeServer];*/
@@ -42,7 +44,7 @@ int main(int argc, const char * argv[])
         
         //[puckServer addObserver];
     
-        NSLog(@"Ciccio %@", [puckServer description]);
+        //NSLog(@"Ciccio %@", [puckServer description]);
         
         //[[NSRunLoop currentRunLoop] run];
     

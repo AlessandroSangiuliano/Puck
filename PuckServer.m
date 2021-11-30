@@ -61,26 +61,23 @@
         [notificationLock unlock];
         [notificationPort sendBeforeDate:[NSDate date] components:nil from:nil reserved:0];
     }
-    else {
+    else
+    {
         NSLog(@"Received: %@", [aNotification name]);
 
-        id <Server> server = (id <Server>) [NSConnection rootProxyForConnectionWithRegisteredName:@"UrosWMServer" host:@""];
-        NSMutableDictionary *windowsMap = [server handleRequestFor:WindowsMapRequest];
+        //id <Server> server = (id <Server>) [NSConnection rootProxyForConnectionWithRegisteredName:@"UrosWMServer" host:@""];
 
         //NSLog(@"Uffa %@", [server handleRequestFor:WindowsMapRequest]);
-
-        /*[connection setWindowsMap:nil];
-        [connection setWindowsMap:[server handleRequestFor:WindowsMapRequest]];*/
-
+        
         /*** update windows map ***/
 
          @synchronized (self)
          {
-             NSLog(@"Uffa %@", [server handleRequestFor:WindowsMapRequest]);
+             //NSLog(@"Uffa %@", [server handleRequestFor:WindowsMapRequest]);
              /*[connection setWindowsMap:nil];
              [connection setWindowsMap:[server handleRequestFor:WindowsMapRequest]];*/
 
-             NSNotification *notification = [NSNotification notificationWithName:INTERNAL_WINDOWS_MAP_UPDATED object:nil userInfo:windowsMap];
+             NSNotification *notification = [NSNotification notificationWithName:INTERNAL_WINDOWS_MAP_UPDATED object:nil];
              NSLog(@"Piripillo");
              //[defaultCenter postNotification:notification];
              [[NSNotificationCenter defaultCenter] postNotification:notification];
@@ -88,8 +85,7 @@
              notification = nil;
          }
 
-         windowsMap = nil;
-        server = nil;
+        //server = nil;
     }
 }
 

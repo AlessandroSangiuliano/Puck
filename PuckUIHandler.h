@@ -9,6 +9,8 @@
 #import <XCBKit/XCBConnection.h>
 #import "utils/PuckUtils.h"
 #import "enums/EResize.h"
+#import <XCBKit/protocols/server/Server.h>
+
 
 #define DOCKMASK  XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_PROPERTY_CHANGE
 #define OFFSET 5
@@ -24,6 +26,8 @@
 @property (strong, nonatomic) PuckUtils *puckUtils;
 @property (strong, nonatomic) XCBConnection *connection;
 @property (strong, nonatomic) NSMutableArray *iconizedWindows;
+@property (strong, nonatomic) id <Server> server;
+@property (assign, nonatomic) BOOL semaphore;
 
 - (instancetype) init;
 - (id) initWithConnection:(XCBConnection*) aConnection;
@@ -39,7 +43,8 @@
 - (void) moveFollowingWindows:(NSInteger) followingQuantity  forWindow:(XCBWindow *) originWindow;
 - (void) moveWindow:(XCBWindow *)aWindow toPosition:(XCBPoint)aPosition;
 - (void) handleNotification:(NSNotification *) aNotification;
-- (void) addListenersForWindows:(NSDictionary *)windows;
+- (void) addListeners;
 - (void) addObserver;
+- (void) setupServer;
 
 @end

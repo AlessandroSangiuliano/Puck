@@ -6,6 +6,7 @@
 
 #import "PuckUIHandler.h"
 #import <XCBKit/XCBFrame.h>
+#import <XCBKit/protocols/server/Server.h>
 #import "functions/Functions.h"
 #import "defines/NotificationDefines.h"
 
@@ -19,6 +20,8 @@
 @synthesize connection;
 @synthesize iconizedWindows;
 @synthesize iconizedWindowsContainer;
+@synthesize server;
+@synthesize semaphore;
 
 - (instancetype)init
 {
@@ -41,6 +44,8 @@
     clientList = [puckUtils queryForNetClientList]; /** we have clientList in the connection too. it could be reused **/
 
     iconizedWindows = [[NSMutableArray alloc] init];
+    
+    semaphore = NO;
 
     /*int size = [puckUtils clientListSize];
 
@@ -358,41 +363,45 @@
 
 - (void)handleNotification:(NSNotification *)aNotification
 {
-    NSDictionary *windowsMap = [aNotification userInfo];
+    semaphore = YES;
+    NSLog(@"Vaggeggia" );
+    /*NSDictionary *windowsMap = [aNotification userInfo];
     NSLog(@"Vaggeggia %@", windowsMap);
     
     @synchronized (self)
     {
         [self updateClientList];
-        [self addListenersForWindows:windowsMap];
-    }
+        [self addListeners];
+    }*/
     
     //[[NSRunLoop currentRunLoop] run];
     
-    windowsMap = nil;
+   // windowsMap = nil;
 }
 
-- (void)addListenersForWindows:(NSDictionary *)windows
+- (void)addListeners
 {
     int size = [puckUtils clientListSize];
-    NSMutableDictionary *windowsMap = [windows mutableCopy];
-    
-    [connection setWindowsMap:nil];
-    [connection setWindowsMap:windowsMap];
-    
-    NSLog(@"count in listeners: %lu", [windowsMap count]);
     
     for (int i = 0; i <size ; ++i)
     {
-        NSLog(@"%@", [windowsMap description]);
         XCBWindow *window = [connection windowForXCBId:clientList[i]];
         NSLog(@"Adding %u", [window window]);
         [puckUtils addListenerForWindow:window withMask:DOCKMASK];
         window = nil;
     }
+}
 
-    windowsMap = nil;
-    NSLog(@"END!!");
+- (void)setupServer
+{
+    if (server == nil)
+        server = (id <Server>) [NSConnection rootProxyForConnectionWithRegisteredName:@"UrosWMServer" host:@""];
+    
+    [connection setWindowsMap:nil];
+    [connection setWindowsMap:[server handleRequestFor:WindowsMapRequest]];
+    [self updateClientList];
+    [self addListeners];
+    NSLog(@"Pene %@", [connection windowsMap]);
 }
 
 - (void)updateClientList
