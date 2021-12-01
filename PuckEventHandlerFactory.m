@@ -48,6 +48,11 @@
         {
             XCBWindow *win = [windows objectAtIndex:i];
             NSLog(@"Add listener for dockWindow %u", [win window]);
+            [win onScreen];
+            [win updateAttributes];
+            [win refreshCachedWMHints];
+            [win generateWindowIcons];
+            [win drawIcons];
             [[uiHandler puckUtils] addListenerForWindow:[windows objectAtIndex:i] withMask:DOCKMASK];
             win = nil;
         }
