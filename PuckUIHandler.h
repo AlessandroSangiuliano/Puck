@@ -32,6 +32,7 @@
 - (BOOL) isIconizedInFirstOrLastPosition:(XCBWindow *)aWindow;
 - (BOOL) isFollowedByAnotherWindow:(XCBWindow *)originWindow;
 - (void) updateClientList;
+- (void) resize:(BOOL)firstOrLastPos needResize:(BOOL)needResize withFrame:(XCBFrame*)aFrame;
 - (void) resizeToPosition:(XCBPoint)aPosition andSize:(XCBSize)aSize resize:(Resize)aResize;
 - (void) removeFromIconizedWindowsById:(xcb_window_t)winId;
 - (XCBWindow*) windowFromIconizedById:(xcb_window_t)winId;
