@@ -375,6 +375,73 @@
         
 }
 
+- (void)resize:(BOOL)firstOrLastPos needResize:(BOOL)needResize withFrame:(XCBFrame*)aFrame
+{
+    NSInteger followingWinsCount = [self countFollowingWindowsForWindow:aFrame];
+    
+    //XCBWindow *dockWindow = [self dockWindow];
+    //XCBWindow *iconizedContainerWindow = [self iconizedWindowsContainer];
+    
+    /*** if forl, is followed and need resize, then it is in first position! ***/
+    
+    if (needResize && [self isFollowedByAnotherWindow:aFrame] && firstOrLastPos)
+    {
+        [self moveFollowingWindows:followingWinsCount forWindow:aFrame];
+        [self removeFromIconizedWindowsById:[aFrame window]];
+        
+        /*** resize the dock ***/
+        
+        XCBRect iconizedContainerRect = [iconizedWindowsContainer windowRect];
+        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
+        XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
+        [self resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
+        [connection flush];
+        needResize = NO;
+    }
+    
+    /*** if forl and is not followed by other windows then it is in first position so just remove the window without resizing the dockbar ***/
+    
+    if (!needResize && ![self isFollowedByAnotherWindow:aFrame] && firstOrLastPos)
+    {
+        [self removeFromIconizedWindowsById:[aFrame window]];
+        [connection flush];
+        needResize = NO;
+    }
+    
+    /*** if forl and need resize and the window is not followed by other windows then it is in last position, so resize the dockbar ***/
+    
+    if (firstOrLastPos && needResize && ![self isFollowedByAnotherWindow:aFrame])
+    {
+        [self removeFromIconizedWindowsById:[aFrame window]];
+        
+        /*** resize the dock ***/
+        
+        XCBRect iconizedContainerRect = [iconizedWindowsContainer windowRect];
+        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
+        XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
+        [self resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
+        [connection flush];
+        needResize = NO;
+    }
+    
+    /*** if not forl, is followed and need resize then the window is in the middle; resize the dockbar and move the followers ***/
+    
+    if (!firstOrLastPos && needResize && [self isFollowedByAnotherWindow:aFrame])
+    {
+        [self moveFollowingWindows:followingWinsCount forWindow:aFrame];
+        [self removeFromIconizedWindowsById:[aFrame window]];
+        
+        /*** resize the dock ***/
+        
+        XCBRect iconizedContainerRect = [iconizedWindowsContainer windowRect];
+        XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
+        XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
+        [self resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
+        [connection flush];
+    }
+}
+
+
 - (void)dealloc
 {
     connection               = nil;
