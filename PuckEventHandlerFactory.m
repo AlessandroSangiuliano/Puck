@@ -93,7 +93,7 @@
                     needResize = YES;
                 
                 forl = [uiHandler isIconizedInFirstOrLastPosition:frame];
-                
+                //i cant start to implement a generic resize method from here probably, so i can reuse the code! args: forl, needResize);
                 NSInteger followingWinsCount = [uiHandler countFollowingWindowsForWindow:frame];
                 
                 XCBWindow *dockWindow = [uiHandler dockWindow];
