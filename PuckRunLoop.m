@@ -53,6 +53,14 @@
             {
                 break;
             }
+            case XCB_DESTROY_NOTIFY:
+            {
+                NSLog(@"Destroy EVENT");
+                xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t *) e;
+                [eventHandler handleDestroyNotify:destroyNotify];
+                [connection flush];
+                break;
+            }
             default:
             {
                 //NSLog(@"Default");

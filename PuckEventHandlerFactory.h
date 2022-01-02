@@ -19,5 +19,6 @@
 - (id)initWithConnection:(XCBConnection*)aConnection andUiHandler:(PuckUIHandler*)anUiHandler;
 
 - (void) handlePropertyNotify:(xcb_property_notify_event_t*)anEvent;
+- (void) handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent;
 
 @end

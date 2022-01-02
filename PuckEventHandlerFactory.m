@@ -181,6 +181,12 @@
     icccmService = nil;
 }
 
+- (void)handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent
+{
+    [uiHandler updateClientList];
+}
+
+
 - (void)dealloc
 {
     connection = nil;
