@@ -40,6 +40,8 @@
             {
                 xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
                 NSLog(@"Window %u mapped", mapNotify->window);
+                [uiHandler updateClientList];// implement a handler that put the mapped window to the windowsMap
+                [connection flush];
                 break;
             }
             case XCB_PROPERTY_NOTIFY:
@@ -55,8 +57,8 @@
             }
             case XCB_DESTROY_NOTIFY:
             {
-                NSLog(@"Destroy EVENT");
                 xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t *) e;
+                NSLog(@"Destroy EVENT for window: %u", destroyNotify->window);
                 [eventHandler handleDestroyNotify:destroyNotify];
                 [connection flush];
                 break;
