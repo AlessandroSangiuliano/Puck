@@ -12,6 +12,7 @@
 
 @synthesize connection;
 @synthesize uiHandler;
+@synthesize statusDestroy;
 
 - (id)initWithConnection:(XCBConnection*)aConnection andUiHandler:(PuckUIHandler*)anUiHandler
 {
@@ -38,7 +39,9 @@
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
     {
         NSLog(@"ClientList");
-        [uiHandler updateClientList];
+        
+        if (!statusDestroy)
+            [uiHandler updateClientList];
         
         NSArray *windows = [[connection windowsMap] allValues];
         
@@ -47,8 +50,19 @@
         for (int i = 0; i < [windows count]; ++i)
         {
             XCBWindow *win = [windows objectAtIndex:i];
-            NSLog(@"Add listener for dockWindow %u", [win window]);
-            [win onScreen];
+    
+            if(![win onScreen])
+            {
+                win = nil;
+                windows = nil;
+                ewmhService = nil;
+                atomService = nil;
+                icccmService = nil;
+                statusDestroy = NO;
+                return;
+            }
+            
+            NSLog(@"Add listener for window %u", [win window]);
             [win updateAttributes];
             [win refreshCachedWMHints];
             [win generateWindowIcons];
@@ -77,6 +91,8 @@
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBFrame *frame = (XCBFrame *)[[window queryTree] parentWindow];
     
+        NSLog(@"Prop changed: %u", [window window]);
+    
         if (frame)
             wmState = [icccmService wmStateFromWindow:frame];
 
@@ -87,7 +103,7 @@
                 BOOL needResize = NO;
                 BOOL forl = NO;
                 
-                NSLog(@"Normal state for dockWindow: %u and frame: %u", [window window], [frame window]);
+                NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
                 
                 if ([[uiHandler iconizedWindows] count] > 1)
                     needResize = YES;
@@ -100,8 +116,13 @@
             }
             case ICCCM_WM_STATE_ICONIC:
             {
-                NSLog(@"Normal state for dockWindow: %u and frame: %u", [window window], [frame window]);
+                NSLog(@"Iconic state for window: %u and frame: %u", [window window], [frame window]);
                 [uiHandler addToIconizedWindowsContainer:frame];
+                break;
+            }
+            case ICCCM_WM_STATE_WITHDRAWN:
+            {
+                NSLog(@"WITHDRAWN state for window: %u and frame: %u", [window window], [frame window]);
                 break;
             }
             default:
@@ -116,11 +137,28 @@
     atomService = nil;
     ewmhService = nil;
     icccmService = nil;
+    statusDestroy = NO;
 }
 
 - (void)handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent
 {
-    [uiHandler updateClientList];
+    statusDestroy = YES;
+    XCBWindow *window = [connection windowForXCBId:anEvent->window];
+    
+    if (!window)
+        return;
+    
+    XCBFrame *frame = (XCBFrame *)[window parentWindow];
+    
+    BOOL needResize = NO;
+    BOOL forl = NO;
+    
+    if ([[uiHandler iconizedWindows] count] > 1)
+        needResize = YES;
+    
+    forl = [uiHandler isIconizedInFirstOrLastPosition:frame];
+    
+    [uiHandler resize:forl needResize:needResize withFrame:frame];
 }
 
 

@@ -15,6 +15,7 @@
 
 @property (strong, nonatomic) XCBConnection* connection;
 @property (strong, nonatomic) PuckUIHandler *uiHandler;
+@property (assign, nonatomic) BOOL statusDestroy;
 
 - (id)initWithConnection:(XCBConnection*)aConnection andUiHandler:(PuckUIHandler*)anUiHandler;
 

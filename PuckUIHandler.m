@@ -178,6 +178,7 @@
         needResize = YES;
     
     [iconizedWindows addObject:aWindow];
+    [aWindow setIsMinimized:YES];
     
     if (needResize)
     {
@@ -207,6 +208,7 @@
         
         if ([win window] == winId)
         {
+            NSLog(@"Found %u", [win window]);
             [iconizedWindows removeObjectAtIndex:i];
             win = nil;
             break;
@@ -365,14 +367,13 @@
         free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
-    [[connection windowsMap]  removeAllObjects];
+    [[connection windowsMap] removeAllObjects];
 
     int size = [puckUtils clientListSize];
     
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
             [puckUtils encapsulateWindow:clientList[i]];
-        
 }
 
 - (void)resize:(BOOL)firstOrLastPos needResize:(BOOL)needResize withFrame:(XCBFrame*)aFrame
@@ -388,6 +389,7 @@
     {
         [self moveFollowingWindows:followingWinsCount forWindow:aFrame];
         [self removeFromIconizedWindowsById:[aFrame window]];
+        [aFrame setIsMinimized:NO];
         
         /*** resize the dock ***/
         
@@ -404,6 +406,7 @@
     if (!needResize && ![self isFollowedByAnotherWindow:aFrame] && firstOrLastPos)
     {
         [self removeFromIconizedWindowsById:[aFrame window]];
+        [aFrame setIsMinimized:NO];
         [connection flush];
         needResize = NO;
     }
@@ -413,6 +416,7 @@
     if (firstOrLastPos && needResize && ![self isFollowedByAnotherWindow:aFrame])
     {
         [self removeFromIconizedWindowsById:[aFrame window]];
+        [aFrame setIsMinimized:NO];
         
         /*** resize the dock ***/
         
@@ -430,6 +434,7 @@
     {
         [self moveFollowingWindows:followingWinsCount forWindow:aFrame];
         [self removeFromIconizedWindowsById:[aFrame window]];
+        [aFrame setIsMinimized:NO];
         
         /*** resize the dock ***/
         
