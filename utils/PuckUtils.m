@@ -91,11 +91,14 @@
     NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
 
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
+    XCBWindow *frame = [[window queryTree] parentWindow];
+    [window setParentWindow:frame];
     [[connection windowsMap] setObject:window forKey:key];
     
 
     window = nil;
     key = nil;
+    frame = nil;
 }
 
 - (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask

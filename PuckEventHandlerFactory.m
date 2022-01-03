@@ -12,6 +12,7 @@
 
 @synthesize connection;
 @synthesize uiHandler;
+@synthesize statusDestroy;
 
 - (id)initWithConnection:(XCBConnection*)aConnection andUiHandler:(PuckUIHandler*)anUiHandler
 {
@@ -38,7 +39,9 @@
     if ([atomService atomFromCachedAtomsWithKey:[ewmhService EWMHClientList]] == anEvent->atom)
     {
         NSLog(@"ClientList");
-        [uiHandler updateClientList];
+        
+        if (!statusDestroy)
+            [uiHandler updateClientList];
         
         NSArray *windows = [[connection windowsMap] allValues];
         
@@ -47,8 +50,19 @@
         for (int i = 0; i < [windows count]; ++i)
         {
             XCBWindow *win = [windows objectAtIndex:i];
-            NSLog(@"Add listener for dockWindow %u", [win window]);
-            [win onScreen];
+    
+            if(![win onScreen])
+            {
+                win = nil;
+                windows = nil;
+                ewmhService = nil;
+                atomService = nil;
+                icccmService = nil;
+                statusDestroy = NO;
+                return;
+            }
+            
+            NSLog(@"Add listener for window %u", [win window]);
             [win updateAttributes];
             [win refreshCachedWMHints];
             [win generateWindowIcons];
@@ -77,6 +91,8 @@
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBFrame *frame = (XCBFrame *)[[window queryTree] parentWindow];
     
+        NSLog(@"Prop changed: %u", [window window]);
+    
         if (frame)
             wmState = [icccmService wmStateFromWindow:frame];
 
@@ -87,84 +103,26 @@
                 BOOL needResize = NO;
                 BOOL forl = NO;
                 
-                NSLog(@"Normal state for dockWindow: %u and frame: %u", [window window], [frame window]);
+                NSLog(@"Normal state for window: %u and frame: %u", [window window], [frame window]);
                 
                 if ([[uiHandler iconizedWindows] count] > 1)
                     needResize = YES;
                 
                 forl = [uiHandler isIconizedInFirstOrLastPosition:frame];
                 
-                NSInteger followingWinsCount = [uiHandler countFollowingWindowsForWindow:frame];
+                [uiHandler resize:forl needResize:needResize withFrame:frame];
                 
-                XCBWindow *dockWindow = [uiHandler dockWindow];
-                XCBWindow *iconizedContainerWindow = [uiHandler iconizedWindowsContainer];
-                
-                /*** if forl, is followed and need resize, then it is in first position! ***/
-                
-                if (needResize && [uiHandler isFollowedByAnotherWindow:frame] && forl)
-                {
-                    [uiHandler moveFollowingWindows:followingWinsCount forWindow:frame];
-                    [uiHandler removeFromIconizedWindowsById:[frame window]];
-                    
-                    /*** resize the dock ***/
-                    
-                    XCBRect iconizedContainerRect = [iconizedContainerWindow windowRect];
-                    XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
-                    XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
-                    [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
-                    [connection flush];
-                    needResize = NO;
-                }
-                
-                /*** if forl and is not followed by other windows then it is in first position so just remove the window without resizing the dockbar ***/
-                
-                if (!needResize && ![uiHandler isFollowedByAnotherWindow:frame] && forl)
-                {
-                    [uiHandler removeFromIconizedWindowsById:[frame window]];
-                    [connection flush];
-                    needResize = NO;
-                }
-                
-                /*** if forl and need resize and the window is not followed by other windows then it is in last position, so resize the dockbar ***/
-                
-                if (forl && needResize && ![uiHandler isFollowedByAnotherWindow:frame])
-                {
-                    [uiHandler removeFromIconizedWindowsById:[frame window]];
-                    
-                    /*** resize the dock ***/
-                    
-                    XCBRect iconizedContainerRect = [iconizedContainerWindow windowRect];
-                    XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
-                    XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
-                    [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
-                    [connection flush];
-                    needResize = NO;
-                }
-                
-                /*** if not forl, is followed and need resize then the window is in the middle; resize the dockbar and move the followers ***/
-                
-                if (!forl && needResize && [uiHandler isFollowedByAnotherWindow:frame])
-                {
-                    [uiHandler moveFollowingWindows:followingWinsCount forWindow:frame];
-                    [uiHandler removeFromIconizedWindowsById:[frame window]];
-                    
-                    /*** resize the dock ***/
-                    
-                    XCBRect iconizedContainerRect = [iconizedContainerWindow windowRect];
-                    XCBPoint newMainWindowPos = XCBMakePoint(([dockWindow windowRect].position.x + 50) - OFFSET * 2 - 3, [dockWindow windowRect].position.y);
-                    XCBSize newIconizedContainerSize = XCBMakeSize(iconizedContainerRect.size.width - 50 - OFFSET *  2 - 3, iconizedContainerRect.size.height);
-                    [uiHandler resizeToPosition:newMainWindowPos andSize:newIconizedContainerSize resize:Reduce];
-                    [connection flush];
-                }
-                
-                dockWindow = nil;
-                iconizedContainerWindow = nil;
                 break;
             }
             case ICCCM_WM_STATE_ICONIC:
             {
-                NSLog(@"Normal state for dockWindow: %u and frame: %u", [window window], [frame window]);
+                NSLog(@"Iconic state for window: %u and frame: %u", [window window], [frame window]);
                 [uiHandler addToIconizedWindowsContainer:frame];
+                break;
+            }
+            case ICCCM_WM_STATE_WITHDRAWN:
+            {
+                NSLog(@"WITHDRAWN state for window: %u and frame: %u", [window window], [frame window]);
                 break;
             }
             default:
@@ -179,11 +137,28 @@
     atomService = nil;
     ewmhService = nil;
     icccmService = nil;
+    statusDestroy = NO;
 }
 
 - (void)handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent
 {
-    [uiHandler updateClientList];
+    statusDestroy = YES;
+    XCBWindow *window = [connection windowForXCBId:anEvent->window];
+    
+    if (!window)
+        return;
+    
+    XCBFrame *frame = (XCBFrame *)[window parentWindow];
+    
+    BOOL needResize = NO;
+    BOOL forl = NO;
+    
+    if ([[uiHandler iconizedWindows] count] > 1)
+        needResize = YES;
+    
+    forl = [uiHandler isIconizedInFirstOrLastPosition:frame];
+    
+    [uiHandler resize:forl needResize:needResize withFrame:frame];
 }
 
 
