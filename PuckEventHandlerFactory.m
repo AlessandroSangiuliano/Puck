@@ -161,6 +161,24 @@
     [uiHandler resize:forl needResize:needResize withFrame:frame];
 }
 
+- (void) handleMapNotify:(xcb_map_notify_event_t *)anEvent
+{
+    XCBWindow *window = [connection windowForXCBId:anEvent->window];
+    
+    if (window)
+        return; // for now just return
+    
+    window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:connection];
+    
+    [window updateAttributes];
+    [window refreshCachedWMHints];
+    [window generateWindowIcons];
+    [window drawIcons];
+    
+    [connection reg]
+    
+}
+
 
 - (void)dealloc
 {

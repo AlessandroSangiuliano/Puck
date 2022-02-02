@@ -200,15 +200,12 @@
 {
     int size = [iconizedWindows count];
     
-    NSLog(@"Size before removing: %d", size);
-    
     for (int i = 0; i < size; ++i)
     {
         XCBWindow *win = [iconizedWindows objectAtIndex:i];
         
         if ([win window] == winId)
         {
-            NSLog(@"Found %u", [win window]);
             [iconizedWindows removeObjectAtIndex:i];
             win = nil;
             break;
@@ -336,7 +333,6 @@
     {
         winPosition++;
         XCBWindow *moving = [iconizedWindows objectAtIndex:winPosition];
-        /*** XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y); ***/
         XCBPoint newPosition = FnCalculateNewPosition(moving, OFFSET);
         [self moveWindow:moving toPosition:newPosition];
         moving = nil;
@@ -358,11 +354,10 @@
                                                    [aWindow originalRect].size.height))];
 }
 
+/*** TODO: EVALUATE IF I CAN USE UPDATEcLIENTlIST DIRECTLY IN THE INIT METHOD ***/
 
 - (void)updateClientList
 {
-    /*** TODO: CHECK IF THIS LEAKING ***/
-    
     if (clientList)
         free(clientList);
 
@@ -379,9 +374,6 @@
 - (void)resize:(BOOL)firstOrLastPos needResize:(BOOL)needResize withFrame:(XCBFrame*)aFrame
 {
     NSInteger followingWinsCount = [self countFollowingWindowsForWindow:aFrame];
-    
-    //XCBWindow *dockWindow = [self dockWindow];
-    //XCBWindow *iconizedContainerWindow = [self iconizedWindowsContainer];
     
     /*** if forl, is followed and need resize, then it is in first position! ***/
     
