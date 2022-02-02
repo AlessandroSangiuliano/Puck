@@ -364,11 +364,11 @@
     clientList = [puckUtils queryForNetClientList];
     [[connection windowsMap] removeAllObjects];
 
-    int size = [puckUtils clientListSize];
+    /*int size = [puckUtils clientListSize];
     
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
-            [puckUtils encapsulateWindow:clientList[i]];
+            [puckUtils encapsulateWindow:clientList[i]];*/
 }
 
 - (void)resize:(BOOL)firstOrLastPos needResize:(BOOL)needResize withFrame:(XCBFrame*)aFrame

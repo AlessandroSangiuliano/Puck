@@ -40,7 +40,14 @@
             {
                 xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
                 NSLog(@"Window %u mapped", mapNotify->window);
-                [uiHandler updateClientList];// implement a handler that put the mapped window to the windowsMap
+                [eventHandler handleMapNotify:mapNotify];
+                [connection flush];
+                break;
+            }
+            case XCB_CREATE_NOTIFY:
+            {
+                xcb_create_notify_event_t *createEvent = (xcb_create_notify_event_t*) e;
+                NSLog(@"Window %u created", createEvent->window);
                 [connection flush];
                 break;
             }
