@@ -22,5 +22,7 @@
 - (xcb_window_t*) queryForNetClientListStacking;
 - (void) encapsulateWindow:(xcb_window_t)aWindow;
 - (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask;
+- (void) registerWindow:(XCBWindow*)aWindow;
+- (void) unregisterWindow:(XCBWindow*) aWindow;
 
 @end

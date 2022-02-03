@@ -143,12 +143,19 @@
 - (void)handleDestroyNotify:(xcb_destroy_notify_event_t *)anEvent
 {
     statusDestroy = YES;
+    XCBFrame *frame;
+    
     XCBWindow *window = [connection windowForXCBId:anEvent->window];
+    
+    PuckUtils *puckUtils = [uiHandler puckUtils];
     
     if (!window)
         return;
     
-    XCBFrame *frame = (XCBFrame *)[window parentWindow];
+    if ([window isKindOfClass:[XCBFrame class]])
+    {
+        frame = (XCBFrame*) [window parentWindow];
+    }
     
     BOOL needResize = NO;
     BOOL forl = NO;
@@ -159,6 +166,8 @@
     forl = [uiHandler isIconizedInFirstOrLastPosition:frame];
     
     [uiHandler resize:forl needResize:needResize withFrame:frame];
+    
+    [puckUtils unregisterWindow:window];
 }
 
 - (void) handleMapNotify:(xcb_map_notify_event_t *)anEvent
@@ -170,13 +179,15 @@
     [window generateWindowIcons];
     [window drawIcons];
     
-    [connection registerWindow:window];
+    PuckUtils *puckUtils = [uiHandler puckUtils];
+    [puckUtils registerWindow:window];
     
-    [[uiHandler puckUtils] addListenerForWindow:window withMask:DOCKMASK];
+    [puckUtils addListenerForWindow:window withMask:DOCKMASK];
     
     NSLog(@"Pene %@", [[connection windowsMap] description]);
     
     window = nil;
+    puckUtils = nil;
 }
 
 

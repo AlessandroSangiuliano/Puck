@@ -5,6 +5,8 @@
 // Created by slex on 02/06/21.
 
 #import "PuckUtils.h"
+#import "XCBKit/XCBFrame.h"
+#import "XCBKit/XCBTitleBar.h"
 
 @implementation PuckUtils
 
@@ -106,6 +108,34 @@
     uint32_t val[] = {aMask};
     [aWindow changeAttributes:val withMask:XCB_CW_EVENT_MASK checked:NO];
 }
+
+- (void)registerWindow:(XCBWindow *)aWindow
+{
+    if ([aWindow isKindOfClass:[XCBTitleBar class]] ||
+            [aWindow isMinimizeButton] ||
+            [aWindow isMaximizeButton] ||
+            [aWindow isCloseButton] ||
+            [aWindow isKindOfClass:[XCBFrame class]])
+    {
+        NSLog(@"Not a client window. Need one of them to be registered.");
+        return;
+    }
+    
+    
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [[connection windowsMap] setObject:aWindow forKey:key];
+    
+    key = nil;
+}
+
+- (void)unregisterWindow:(XCBWindow *)aWindow
+{
+    NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
+    [[connection windowsMap] removeObjectForKey:key];
+    
+    key = nil;
+}
+
 
 - (void)dealloc
 {
