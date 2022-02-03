@@ -178,16 +178,14 @@
     NSLog(@"Windows map %@", [[connection windowsMap] description]);
     
     PuckUtils *puckUtils = [uiHandler puckUtils];
-    [uiHandler updateClientList];
     
-    BOOL present = FnIsWindowInClientList(anEvent->window, [uiHandler clientList], [[uiHandler puckUtils] clientListSize]);
+    /*BOOL present = FnIsWindowInClientList(anEvent->window, [uiHandler clientList], [[uiHandler puckUtils] clientListSize]);
     
     if (!present)
     {
         NSLog(@"Window not in client list");
         return;
-    }
-    
+    }*/
     
     [puckUtils encapsulateWindow:anEvent->window];
     
@@ -202,7 +200,7 @@
     [window description];
     [[window parentWindow] description];
     
-    [puckUtils addListenerForWindow:window withMask:DOCKMASK];
+    [puckUtils addListenerForWindow:[window parentWindow] withMask:DOCKMASK];
     
     puckUtils = nil;
     window = nil;

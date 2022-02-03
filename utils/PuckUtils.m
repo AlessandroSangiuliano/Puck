@@ -92,6 +92,7 @@
 {
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
     XCBWindow *frame = [[window queryTree] parentWindow];
+    
     [window setParentWindow:frame];
     [self registerWindow:window];
 
