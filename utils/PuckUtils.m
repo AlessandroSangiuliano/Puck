@@ -90,16 +90,12 @@
 
 - (void) encapsulateWindow:(xcb_window_t)aWindow
 {
-    NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
-
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
     XCBWindow *frame = [[window queryTree] parentWindow];
     [window setParentWindow:frame];
-    [[connection windowsMap] setObject:window forKey:key];
-    
+    [self registerWindow:window];
 
     window = nil;
-    key = nil;
     frame = nil;
 }
 

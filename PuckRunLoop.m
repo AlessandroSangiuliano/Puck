@@ -48,6 +48,7 @@
             {
                 xcb_create_notify_event_t *createEvent = (xcb_create_notify_event_t*) e;
                 NSLog(@"Window %u created", createEvent->window);
+                [eventHandler handleCreateNotify:createEvent];
                 [connection flush];
                 break;
             }

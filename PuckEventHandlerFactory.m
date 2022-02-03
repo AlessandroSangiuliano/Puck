@@ -7,6 +7,7 @@
 #import "PuckEventHandlerFactory.h"
 #import <XCBKit/services/ICCCMService.h>
 #import <XCBKit/XCBFrame.h>
+#import "functions/Functions.h"
 
 @implementation PuckEventHandlerFactory
 
@@ -44,8 +45,6 @@
             [uiHandler updateClientList];
         
         NSArray *windows = [[connection windowsMap] allValues];
-        
-        //TODO: print the windows map and the client list
 
         for (int i = 0; i < [windows count]; ++i)
         {
@@ -85,11 +84,11 @@
 
     if ([atomService atomFromCachedAtomsWithKey:[icccmService WMState]] == anEvent->atom)
     {
-        NSLog(@"WM STATE for dockWindow %u", anEvent->window);
+        NSLog(@"WM STATE for window %u", anEvent->window);
         WindowState wmState = -1;
 
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
-        XCBFrame *frame = (XCBFrame *)[[window queryTree] parentWindow];
+        XCBFrame *frame = (XCBFrame *)[[window queryTree] parentWindow]; //FIXME: when in the connection the parent window is just set!
     
         NSLog(@"Prop changed: %u", [window window]);
     
@@ -154,8 +153,10 @@
     
     if ([window isKindOfClass:[XCBFrame class]])
     {
-        frame = (XCBFrame*) [window parentWindow];
+        frame = (XCBFrame*) window;
     }
+    else
+        frame = (XCBFrame*) [window parentWindow];
     
     BOOL needResize = NO;
     BOOL forl = NO;
@@ -172,22 +173,80 @@
 
 - (void) handleMapNotify:(xcb_map_notify_event_t *)anEvent
 {
-    XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:anEvent->window andConnection:connection];
+    NSLog(@"Really mapped %u", anEvent->window);
+    
+    NSLog(@"Windows map %@", [[connection windowsMap] description]);
+    
+    PuckUtils *puckUtils = [uiHandler puckUtils];
+    [uiHandler updateClientList];
+    
+    BOOL present = FnIsWindowInClientList(anEvent->window, [uiHandler clientList], [[uiHandler puckUtils] clientListSize]);
+    
+    if (!present)
+    {
+        NSLog(@"Window not in client list");
+        return;
+    }
+    
+    
+    [puckUtils encapsulateWindow:anEvent->window];
+    
+    XCBWindow *window = [connection windowForXCBId:anEvent->window];
     
     [window updateAttributes];
     [window refreshCachedWMHints];
     [window generateWindowIcons];
     [window drawIcons];
     
-    PuckUtils *puckUtils = [uiHandler puckUtils];
-    [puckUtils registerWindow:window];
+    NSLog(@"Window %u found", [window window]);
+    [window description];
+    [[window parentWindow] description];
     
     [puckUtils addListenerForWindow:window withMask:DOCKMASK];
     
-    NSLog(@"Pene %@", [[connection windowsMap] description]);
-    
-    window = nil;
     puckUtils = nil;
+    window = nil;
+    
+    xcb_window_t *cl = [uiHandler clientList];
+    
+    for (int i = 0; i <[[uiHandler puckUtils] clientListSize]; ++i)
+    {
+        NSLog(@"Windows in client list: %u", cl[i]);
+    }
+}
+
+- (void)handleCreateNotify:(xcb_create_notify_event_t *)anEvent
+{
+    /*PuckUtils *puckUtils = [uiHandler puckUtils];
+    [uiHandler updateClientList];
+    
+    BOOL present = FnIsWindowInClientList(anEvent->window, [uiHandler clientList], [[uiHandler puckUtils] clientListSize]);
+    
+    if (!present)
+    {
+        NSLog(@"Window not in client list");
+        return;
+    }
+    
+    
+    [puckUtils encapsulateWindow:anEvent->window];
+    
+    XCBWindow *window = [connection windowForXCBId:anEvent->window];
+    
+    [window updateAttributes];
+    [window refreshCachedWMHints];
+    [window generateWindowIcons];
+    [window drawIcons];
+    
+    NSLog(@"Window %u found", [window window]);
+    [window description];
+    [[window parentWindow] description];
+    
+    [puckUtils addListenerForWindow:window withMask:DOCKMASK];
+    
+    puckUtils = nil;
+    window = nil;*/
+    
 }
 
 
