@@ -90,13 +90,43 @@
 
 - (void) encapsulateWindow:(xcb_window_t)aWindow
 {
+    BOOL dock = NO;
+    XCBWindow *rootWindow = [[[connection screens] objectAtIndex:0] rootWindow];
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
     XCBWindow *frame = [[window queryTree] parentWindow];
+    
+    void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
+                                        propertyType:XCB_ATOM_ATOM
+                                           forWindow:window
+                                              delete:NO
+                                              length:1];
+    
+    if (windowTypeReply)
+    {
+        xcb_atom_t atom = *(xcb_atom_t *) xcb_get_property_value(windowTypeReply);
+        
+        if (atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
+        {
+            NSLog(@"SCIABOLATA MORBIDA Puck Utils %u", [window window]);
+            dock = YES;
+        }
+    }
+    
+    if (/*([frame window] == [rootWindow window]) ||*/ !dock)
+    {
+        NSLog(@"Not adding the root window. Frame: %u, window: %u", [frame window], [window window]);
+        rootWindow = nil;
+        window = nil;
+        frame = nil;
+        return;
+    }
+    
     [window setParentWindow:frame];
     [self registerWindow:window];
 
     window = nil;
     frame = nil;
+    rootWindow = nil;
 }
 
 - (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask

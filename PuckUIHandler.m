@@ -95,6 +95,7 @@
     [dockWindow stackAbove];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     [ewmhService updateNetWmState:dockWindow];
+    [ewmhService updateNetWmWindowTypeDockForWindow:dockWindow];
 
     /*** Request for the iconized windows container ***/
     
@@ -112,6 +113,23 @@
     response = [connection createWindowForRequest:request registerWindow:NO];
 
     iconizedWindowsContainer = [response window];
+    [ewmhService updateNetWmWindowTypeDockForWindow:iconizedWindowsContainer];
+    
+    void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
+                                        propertyType:XCB_ATOM_ATOM
+                                           forWindow:dockWindow
+                                              delete:NO
+                                              length:1];
+    
+    if (windowTypeReply)
+    {
+        xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
+        
+        if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
+        {
+            NSLog(@"SCIABOLATA MORBIDA %u", [dockWindow window]);
+        }
+    }
     
     /*** Request for separator window ***/
     

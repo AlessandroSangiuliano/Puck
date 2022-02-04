@@ -90,7 +90,7 @@
         XCBWindow *window = [connection windowForXCBId:anEvent->window];
         XCBFrame *frame = (XCBFrame *)[[window queryTree] parentWindow]; //FIXME: when in the connection the parent window is just set!
     
-        NSLog(@"Prop changed: %u", [window window]);
+        NSLog(@"Prop changed: %u frame window: %u", [window window], [frame window]);
     
         if (frame)
             wmState = [icccmService wmStateFromWindow:frame];
@@ -175,8 +175,6 @@
 {
     NSLog(@"Really mapped %u", anEvent->window);
     
-    NSLog(@"Windows map %@", [[connection windowsMap] description]);
-    
     PuckUtils *puckUtils = [uiHandler puckUtils];
     
     /*BOOL present = FnIsWindowInClientList(anEvent->window, [uiHandler clientList], [[uiHandler puckUtils] clientListSize]);
@@ -189,6 +187,8 @@
     
     [puckUtils encapsulateWindow:anEvent->window];
     
+    NSLog(@"Windows map %@", [[connection windowsMap] description]);
+    
     XCBWindow *window = [connection windowForXCBId:anEvent->window];
     
     [window updateAttributes];
@@ -198,9 +198,9 @@
     
     NSLog(@"Window %u found", [window window]);
     [window description];
-    [[window parentWindow] description];
+    //[[window parentWindow] description];
     
-    [puckUtils addListenerForWindow:[window parentWindow] withMask:DOCKMASK];
+    [puckUtils addListenerForWindow:window withMask:DOCKMASK];
     
     puckUtils = nil;
     window = nil;
