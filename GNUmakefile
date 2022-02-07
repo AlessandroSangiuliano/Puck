@@ -2,7 +2,7 @@ PACKAGE_NAME = Puck
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-VERSION = 0.0.2
+VERSION = 0.0.3
 
 DEPENDENCIES = XCBKit
 
