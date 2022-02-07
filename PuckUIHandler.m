@@ -7,6 +7,7 @@
 #import "PuckUIHandler.h"
 #import <XCBKit/XCBFrame.h>
 #import "functions/Functions.h"
+#import "utils/EncapsulatedWindow.h"
 
 
 @implementation PuckUIHandler
@@ -54,7 +55,11 @@
     int size = [puckUtils clientListSize];
 
     for (int i = 0; i < size; ++i)
-        [puckUtils encapsulateWindow:clientList[i]];
+    {
+       EncapsulatedWindow *encapsulatedWindow = [puckUtils encapsulateWindow:clientList[i]];
+       [puckUtils registerWindow:[encapsulatedWindow window]];
+       encapsulatedWindow = nil;
+    }
 
     return self;
 }
@@ -95,6 +100,7 @@
     [dockWindow stackAbove];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     [ewmhService updateNetWmState:dockWindow];
+    [ewmhService updateNetWmWindowTypeDockForWindow:dockWindow];
 
     /*** Request for the iconized windows container ***/
     
@@ -112,6 +118,23 @@
     response = [connection createWindowForRequest:request registerWindow:NO];
 
     iconizedWindowsContainer = [response window];
+    [ewmhService updateNetWmWindowTypeDockForWindow:iconizedWindowsContainer];
+    
+    void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
+                                        propertyType:XCB_ATOM_ATOM
+                                           forWindow:dockWindow
+                                              delete:NO
+                                              length:1];
+    
+    if (windowTypeReply)
+    {
+        xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
+        
+        if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
+        {
+            NSLog(@"SCIABOLATA MORBIDA %u", [dockWindow window]);
+        }
+    }
     
     /*** Request for separator window ***/
     
@@ -179,6 +202,8 @@
     
     [iconizedWindows addObject:aWindow];
     [aWindow setIsMinimized:YES];
+    
+    NSLog(@"Frame %u minimized %d", [aWindow window], [aWindow isMinimized]);
     
     if (needResize)
     {
@@ -354,6 +379,26 @@
                                                    [aWindow originalRect].size.height))];
 }
 
+- (NSString *)description
+{
+    NSMutableString *description = [NSMutableString new];
+    int size = [puckUtils clientListSize];
+    
+    for (int i = 0; i < size; i++)
+    {
+        NSString *str = [NSString stringWithFormat:@"%u", clientList[i]];
+        [description appendString:str];
+    
+        if ((i+1) != size)
+            [description appendString:@" "];
+        
+        str = nil;
+    }
+    
+    return description;
+}
+
+
 /*** TODO: EVALUATE IF I CAN USE UPDATEcLIENTlIST DIRECTLY IN THE INIT METHOD ***/
 
 - (void)updateClientList
@@ -362,9 +407,9 @@
         free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
-    [[connection windowsMap] removeAllObjects];
+    /*[[connection windowsMap] removeAllObjects];
 
-    /*int size = [puckUtils clientListSize];
+    int size = [puckUtils clientListSize];
     
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
