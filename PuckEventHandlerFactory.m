@@ -202,7 +202,7 @@
         return;
     }
     
-    xcb_window_t *children = [encapsulatedWindow children]; //FIXME: must be free´d ?
+    xcb_window_t *children = [encapsulatedWindow children];
     
     int count = [encapsulatedWindow childrenLen];
     
