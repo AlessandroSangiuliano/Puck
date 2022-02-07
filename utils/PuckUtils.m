@@ -88,45 +88,30 @@
     return list;
 }
 
-- (void) encapsulateWindow:(xcb_window_t)aWindow
+- (EncapsulatedWindow*) encapsulateWindow:(xcb_window_t)aWindow
 {
-    BOOL dock = NO;
-    XCBWindow *rootWindow = [[[connection screens] objectAtIndex:0] rootWindow];
+    XCBWindow *parentWindow;
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
-    XCBWindow *frame = [[window queryTree] parentWindow];
+    XCBQueryTreeReply *queryTreeReply = [window queryTree];
     
-    void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
-                                        propertyType:XCB_ATOM_ATOM
-                                           forWindow:window
-                                              delete:NO
-                                              length:1];
+    if ([queryTreeReply isError])
+        return nil;
     
-    if (windowTypeReply)
-    {
-        xcb_atom_t atom = *(xcb_atom_t *) xcb_get_property_value(windowTypeReply);
-        
-        if (atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
-        {
-            NSLog(@"SCIABOLATA MORBIDA Puck Utils %u", [window window]);
-            dock = YES;
-        }
-    }
+    xcb_window_t *children = [queryTreeReply queryTreeAsArray];
     
-    if (/*([frame window] == [rootWindow window]) ||*/ !dock)
-    {
-        NSLog(@"Not adding the root window. Frame: %u, window: %u", [frame window], [window window]);
-        rootWindow = nil;
-        window = nil;
-        frame = nil;
-        return;
-    }
+    parentWindow = [queryTreeReply parentWindow];
+    [window setParentWindow:parentWindow];
     
-    [window setParentWindow:frame];
-    [self registerWindow:window];
-
+    EncapsulatedWindow *encapsulatedWindow = [[EncapsulatedWindow alloc] init];
+    [encapsulatedWindow setChildren:children];
+    [encapsulatedWindow setWindow:window];
+    [encapsulatedWindow setChildrenLen:[queryTreeReply childrenLen]];
+    
+    queryTreeReply = nil;
     window = nil;
-    frame = nil;
-    rootWindow = nil;
+    parentWindow = nil;
+    
+    return encapsulatedWindow;
 }
 
 - (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask
@@ -146,7 +131,6 @@
         NSLog(@"Not a client window. Need one of them to be registered.");
         return;
     }
-    
     
     NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
     [[connection windowsMap] setObject:aWindow forKey:key];

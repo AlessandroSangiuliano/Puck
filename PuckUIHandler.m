@@ -7,6 +7,7 @@
 #import "PuckUIHandler.h"
 #import <XCBKit/XCBFrame.h>
 #import "functions/Functions.h"
+#import "utils/EncapsulatedWindow.h"
 
 
 @implementation PuckUIHandler
@@ -54,7 +55,11 @@
     int size = [puckUtils clientListSize];
 
     for (int i = 0; i < size; ++i)
-        [puckUtils encapsulateWindow:clientList[i]];
+    {
+       EncapsulatedWindow *encapsulatedWindow = [puckUtils encapsulateWindow:clientList[i]];
+       [puckUtils registerWindow:[encapsulatedWindow window]];
+       encapsulatedWindow = nil;
+    }
 
     return self;
 }
@@ -197,6 +202,8 @@
     
     [iconizedWindows addObject:aWindow];
     [aWindow setIsMinimized:YES];
+    
+    NSLog(@"Frame %u minimized %d", [aWindow window], [aWindow isMinimized]);
     
     if (needResize)
     {
@@ -371,6 +378,26 @@
                                        XCBMakeSize([aWindow originalRect].size.width,
                                                    [aWindow originalRect].size.height))];
 }
+
+- (NSString *)description
+{
+    NSMutableString *description = [NSMutableString new];
+    int size = [puckUtils clientListSize];
+    
+    for (int i = 0; i < size; i++)
+    {
+        NSString *str = [NSString stringWithFormat:@"%u", clientList[i]];
+        [description appendString:str];
+    
+        if ((i+1) != size)
+            [description appendString:@" "];
+        
+        str = nil;
+    }
+    
+    return description;
+}
+
 
 /*** TODO: EVALUATE IF I CAN USE UPDATEcLIENTlIST DIRECTLY IN THE INIT METHOD ***/
 

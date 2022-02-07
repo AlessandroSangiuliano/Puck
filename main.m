@@ -23,7 +23,7 @@ int main(int argc, const char * argv[])
         PuckRunLoop   *puckRunLoop = [[PuckRunLoop alloc] initWithUIHandler:uiHandler];
         [uiHandler drawDock:200 andHeigth:60];
     
-        int size = [[uiHandler puckUtils] clientListSize];
+        int size = [[connection windowsMap] count]; //[[uiHandler puckUtils] clientListSize];
     
         NSArray *windows = [[connection windowsMap] allValues];
     
