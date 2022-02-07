@@ -7,6 +7,7 @@
 #import "PuckUIHandler.h"
 #import <XCBKit/XCBFrame.h>
 #import "functions/Functions.h"
+#import "utils/EncapsulatedWindow.h"
 
 
 @implementation PuckUIHandler
@@ -54,7 +55,11 @@
     int size = [puckUtils clientListSize];
 
     for (int i = 0; i < size; ++i)
-        [puckUtils encapsulateWindow:clientList[i]];
+    {
+       EncapsulatedWindow *encapsulatedWindow = [puckUtils encapsulateWindow:clientList[i]];
+       [puckUtils registerWindow:[encapsulatedWindow window]];
+       encapsulatedWindow = nil;
+    }
 
     return self;
 }
@@ -95,6 +100,7 @@
     [dockWindow stackAbove];
     EWMHService *ewmhService = [EWMHService sharedInstanceWithConnection:connection];
     [ewmhService updateNetWmState:dockWindow];
+    [ewmhService updateNetWmWindowTypeDockForWindow:dockWindow];
 
     /*** Request for the iconized windows container ***/
     
@@ -112,6 +118,23 @@
     response = [connection createWindowForRequest:request registerWindow:NO];
 
     iconizedWindowsContainer = [response window];
+    [ewmhService updateNetWmWindowTypeDockForWindow:iconizedWindowsContainer];
+    
+    void *windowTypeReply = [ewmhService getProperty:[ewmhService EWMHWMWindowType]
+                                        propertyType:XCB_ATOM_ATOM
+                                           forWindow:dockWindow
+                                              delete:NO
+                                              length:1];
+    
+    if (windowTypeReply)
+    {
+        xcb_atom_t *atom = (xcb_atom_t *) xcb_get_property_value(windowTypeReply);
+        
+        if (*atom == [[ewmhService atomService] atomFromCachedAtomsWithKey:[ewmhService EWMHWMWindowTypeDock]])
+        {
+            NSLog(@"SCIABOLATA MORBIDA %u", [dockWindow window]);
+        }
+    }
     
     /*** Request for separator window ***/
     
@@ -180,6 +203,8 @@
     [iconizedWindows addObject:aWindow];
     [aWindow setIsMinimized:YES];
     
+    NSLog(@"Frame %u minimized %d", [aWindow window], [aWindow isMinimized]);
+    
     if (needResize)
     {
         XCBRect rect = [iconizedWindowsContainer windowRect];
@@ -200,15 +225,12 @@
 {
     int size = [iconizedWindows count];
     
-    NSLog(@"Size before removing: %d", size);
-    
     for (int i = 0; i < size; ++i)
     {
         XCBWindow *win = [iconizedWindows objectAtIndex:i];
         
         if ([win window] == winId)
         {
-            NSLog(@"Found %u", [win window]);
             [iconizedWindows removeObjectAtIndex:i];
             win = nil;
             break;
@@ -336,7 +358,6 @@
     {
         winPosition++;
         XCBWindow *moving = [iconizedWindows objectAtIndex:winPosition];
-        /*** XCBMakePoint(([dockWindow windowRect].position.x - 50) + OFFSET * 2 + 3, [dockWindow windowRect].position.y); ***/
         XCBPoint newPosition = FnCalculateNewPosition(moving, OFFSET);
         [self moveWindow:moving toPosition:newPosition];
         moving = nil;
@@ -358,30 +379,46 @@
                                                    [aWindow originalRect].size.height))];
 }
 
+- (NSString *)description
+{
+    NSMutableString *description = [NSMutableString new];
+    int size = [puckUtils clientListSize];
+    
+    for (int i = 0; i < size; i++)
+    {
+        NSString *str = [NSString stringWithFormat:@"%u", clientList[i]];
+        [description appendString:str];
+    
+        if ((i+1) != size)
+            [description appendString:@" "];
+        
+        str = nil;
+    }
+    
+    return description;
+}
+
+
+/*** TODO: EVALUATE IF I CAN USE UPDATEcLIENTlIST DIRECTLY IN THE INIT METHOD ***/
 
 - (void)updateClientList
 {
-    /*** TODO: CHECK IF THIS LEAKING ***/
-    
     if (clientList)
         free(clientList);
 
     clientList = [puckUtils queryForNetClientList];
-    [[connection windowsMap] removeAllObjects];
+    /*[[connection windowsMap] removeAllObjects];
 
     int size = [puckUtils clientListSize];
     
     for (int i = 0; i < size; ++i)
         if (clientList[i] != 0)
-            [puckUtils encapsulateWindow:clientList[i]];
+            [puckUtils encapsulateWindow:clientList[i]];*/
 }
 
 - (void)resize:(BOOL)firstOrLastPos needResize:(BOOL)needResize withFrame:(XCBFrame*)aFrame
 {
     NSInteger followingWinsCount = [self countFollowingWindowsForWindow:aFrame];
-    
-    //XCBWindow *dockWindow = [self dockWindow];
-    //XCBWindow *iconizedContainerWindow = [self iconizedWindowsContainer];
     
     /*** if forl, is followed and need resize, then it is in first position! ***/
     

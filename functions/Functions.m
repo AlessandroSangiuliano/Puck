@@ -31,3 +31,16 @@ NSInteger FnIndexOfWindow(NSMutableArray *anArray, XCBWindow *searchingWindow)
     
     return index;
 }
+
+BOOL FnIsWindowInClientList(xcb_window_t win, xcb_window_t *cl, int len)
+{
+    BOOL found = NO;
+    
+    for (int i = 0; i < len; ++i)
+    {
+        if (win == cl[i])
+            found = YES;
+    }
+    
+    return found;
+}

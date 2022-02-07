@@ -18,6 +18,7 @@ $(TOOL_NAME)_OBJC_FILES = \
 		PuckRunLoop.m \
 		PuckEventHandlerFactory.m \
 		utils/PuckUtils.m \
+		utils/EncapsulatedWindow.m \
 		functions/Functions.m \
 
 $(TOOL_NAME)_HEADER_FILES = \
@@ -25,6 +26,7 @@ $(TOOL_NAME)_HEADER_FILES = \
 		PuckRunLoop.h \
 		PuckEventHandlerFactory.h \
 		utils/PuckUtils.h \
+		utils/EncapsulatedWindow.h \
 		functions/Functions.h \
 
 $(TOOL_NAME)_TOOL_LIBS = -lXCBKit -lxcb
