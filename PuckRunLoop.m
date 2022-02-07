@@ -44,13 +44,6 @@
                 [connection flush];
                 break;
             }
-            case XCB_CREATE_NOTIFY:
-            {
-                xcb_create_notify_event_t *createEvent = (xcb_create_notify_event_t*) e;
-                NSLog(@"Window %u created", createEvent->window);
-                [connection flush];
-                break;
-            }
             case XCB_PROPERTY_NOTIFY:
             {
                 xcb_property_notify_event_t *propEvent = (xcb_property_notify_event_t *) e;

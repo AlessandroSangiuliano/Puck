@@ -88,19 +88,30 @@
     return list;
 }
 
-- (void) encapsulateWindow:(xcb_window_t)aWindow
+- (EncapsulatedWindow*) encapsulateWindow:(xcb_window_t)aWindow
 {
-    NSNumber *key = [[NSNumber alloc] initWithInt:aWindow];
-
+    XCBWindow *parentWindow;
     XCBWindow *window = [[XCBWindow alloc] initWithXCBWindow:aWindow andConnection:connection];
-    XCBWindow *frame = [[window queryTree] parentWindow];
-    [window setParentWindow:frame];
-    [[connection windowsMap] setObject:window forKey:key];
+    XCBQueryTreeReply *queryTreeReply = [window queryTree];
     
-
+    if ([queryTreeReply isError])
+        return nil;
+    
+    xcb_window_t *children = [queryTreeReply queryTreeAsArray];
+    
+    parentWindow = [queryTreeReply parentWindow];
+    [window setParentWindow:parentWindow];
+    
+    EncapsulatedWindow *encapsulatedWindow = [[EncapsulatedWindow alloc] init];
+    [encapsulatedWindow setChildren:children];
+    [encapsulatedWindow setWindow:window];
+    [encapsulatedWindow setChildrenLen:[queryTreeReply childrenLen]];
+    
+    queryTreeReply = nil;
     window = nil;
-    key = nil;
-    frame = nil;
+    parentWindow = nil;
+    
+    return encapsulatedWindow;
 }
 
 - (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask
@@ -120,7 +131,6 @@
         NSLog(@"Not a client window. Need one of them to be registered.");
         return;
     }
-    
     
     NSNumber *key = [NSNumber numberWithUnsignedInt:[aWindow window]];
     [[connection windowsMap] setObject:aWindow forKey:key];

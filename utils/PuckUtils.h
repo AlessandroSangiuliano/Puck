@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <XCBKit/XCBConnection.h>
 #import <XCBKit/services/EWMHService.h>
+#import "EncapsulatedWindow.h"
 
 @interface PuckUtils : NSObject
 {
@@ -20,7 +21,7 @@
 - (id)initWhitConnection:(XCBConnection*)aConnection;
 - (xcb_window_t*)queryForNetClientList;
 - (xcb_window_t*) queryForNetClientListStacking;
-- (void) encapsulateWindow:(xcb_window_t)aWindow;
+- (EncapsulatedWindow*) encapsulateWindow:(xcb_window_t)aWindow;
 - (void) addListenerForWindow:(XCBWindow*)aWindow withMask:(uint32_t)aMask;
 - (void) registerWindow:(XCBWindow*)aWindow;
 - (void) unregisterWindow:(XCBWindow*) aWindow;
