@@ -1,13 +1,13 @@
 //
-// PuckEventHandler
+// PuckRunLoop
 // Puck
 //
 // Created by slex on 30/05/21.
 
-#import "PuckEventHandler.h"
+#import "PuckRunLoop.h"
 #import "PuckEventHandlerFactory.h"
 
-@implementation PuckEventHandler
+@implementation PuckRunLoop
 
 @synthesize uiHandler;
 
@@ -30,7 +30,7 @@
 {
     xcb_generic_event_t *e;
     XCBConnection *connection = [uiHandler connection];
-    PuckEventHandlerFactory *eventHandler = [[PuckEventHandlerFactory alloc] initWithConnection:connection];
+    PuckEventHandlerFactory *eventHandler = [[PuckEventHandlerFactory alloc] initWithConnection:connection andUiHandler:uiHandler];
 
     while ((e = xcb_wait_for_event([connection connection])))
     {
@@ -40,6 +40,8 @@
             {
                 xcb_map_notify_event_t *mapNotify = (xcb_map_notify_event_t*) e;
                 NSLog(@"Window %u mapped", mapNotify->window);
+                [eventHandler handleMapNotify:mapNotify];
+                [connection flush];
                 break;
             }
             case XCB_PROPERTY_NOTIFY:
@@ -53,9 +55,17 @@
             {
                 break;
             }
+            case XCB_DESTROY_NOTIFY:
+            {
+                xcb_destroy_notify_event_t *destroyNotify = (xcb_destroy_notify_event_t *) e;
+                NSLog(@"Destroy EVENT for window: %u", destroyNotify->window);
+                [eventHandler handleDestroyNotify:destroyNotify];
+                [connection flush];
+                break;
+            }
             default:
             {
-                NSLog(@"Default");
+                //NSLog(@"Default");
                 break;
             }
         }
@@ -68,7 +78,6 @@
 - (void) dealloc
 {
     uiHandler = nil;
-
 }
 
 @end

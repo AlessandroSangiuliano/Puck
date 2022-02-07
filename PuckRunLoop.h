@@ -1,5 +1,5 @@
 //
-// PuckEventHandler
+// PuckRunLoop
 // Puck
 //
 // Created by slex on 30/05/21.
@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "PuckUIHandler.h"
 
-@interface PuckEventHandler : NSObject
+@interface PuckRunLoop : NSObject
 {
 }
 
